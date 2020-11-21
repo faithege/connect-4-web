@@ -1,0 +1,92 @@
+Description: "Connect 4 Web Application Template"  
+Resources: 
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Principal: 
+              # Here we've specified the Lambda service, we could be more specific and choose a particular lambda
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns: # allows our lambda to write to logs - this policy is created by AWS
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  DynamoPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DynamoPolicy
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: 
+              - dynamodb:UpdateItem ####### POSSIBLY UPDATE THIS
+              - dynamodb:Scan
+            Resource: !GetAtt Table.Arn # or !Sub arn:aws:dynamodb:eu-west-1:${AWS::AccountId}:table/${Table} - sub acts as a template literal, substitute names in
+      Roles: 
+        - !Ref Role
+
+  Function:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code: ../lambda-js/lib #directory with transpiled lambda in
+      Runtime: nodejs12.x
+      Handler: index.handler ########## CHANGE THIS
+      Role: !GetAtt Role.Arn
+      Environment: 
+        Variables:
+          TABLE_NAME: !Ref Table
+
+  Table: 
+    Type: AWS::DynamoDB::Table
+    Properties:
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      AttributeDefinitions:
+      - AttributeName: GameId 
+        AttributeType: N
+      - AttributeName: DateCreated 
+        AttributeType: S
+      KeySchema:
+      - AttributeName: GameId # We are hashing the data to give it a more even distribution
+        KeyType: HASH
+      - AttributeName: DateCreated
+        KeyType: RANGE
+
+  # # Permission for API gateway to execute our function - giving any API permission at the moment (make more specific with source Arn)
+  # ApiGatewayPermission: 
+  #   Type: AWS::Lambda::Permission 
+  #   Properties: 
+  #     FunctionName: !GetAtt Function.Arn 
+  #     Action: lambda:InvokeFunction 
+  #     Principal: apigateway.amazonaws.com
+
+  # Api: #Gateway resource
+  #   Type: AWS::ApiGateway::RestApi
+  #   Properties:
+  #     Name: RestApi
+  
+  # ApiResource: 
+  #   Type: AWS::ApiGateway::Resource
+  #   Properties:
+  #     RestApiId: !Ref Api
+  #     ParentId: !GetAtt 
+  #       - Api
+  #       - RootResourceId # specified in docs
+  #     PathPart: '{proxy+}' # this catches all file paths (except the root) - could be more specific eg /devices goes to a specific lambda
+  
+  # ApiMethod:
+  #   Type: AWS::ApiGateway::Method
+  #   Properties: 
+  #     RestApiId: !Ref Api
+  #     ResourceId: !Ref ApiResource
+  #     HttpMethod: ANY
+  #     AuthorizationType: NONE
+  #     Integration:
+  #       Type: AWS_PROXY
+  #       IntegrationHttpMethod: POST
+  #       Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Function.Arn}/invocations

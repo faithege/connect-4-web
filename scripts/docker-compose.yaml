@@ -1,0 +1,18 @@
+version: '2.1'
+
+services:
+  localstack:
+    image: localstack/localstack:0.12.2
+    ports:
+      - "4566:4566"
+    expose: # we expose port 4566, this is how the lambda coontainer can access the dynamodb
+      - 4566
+    environment:
+      SERVICES: dynamodb,cloudformation,lambda,apigateway,s3
+      DATA_DIR: /tmp/localstack/data
+      DEFAULT_REGION: eu-west-1
+    # needed to add /private - apple quirk
+    # temporary directory where data saved
+    volumes:
+      - "/private${TMPDIR:-/tmp/localstack}/connect4:/tmp/localstack"
+      
