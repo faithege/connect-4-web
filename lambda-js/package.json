@@ -5,11 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "lint": "eslint",
-    "test": "../scripts/check-local-stack-running.sh && jest --coverage",
-    "test:watch": "../scripts/check-local-stack-running.sh && jest --watch",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "transpile": "babel src --out-dir lib --extensions '.ts' ",
-    "invokeGet": "npm run transpile && node ./lib/run-local.js GET",
-    "invokePost": "npm run transpile && node ./lib/run-local.js POST",
     "tsc": "tsc"
   },
   "author": "",
