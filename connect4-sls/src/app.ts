@@ -34,7 +34,6 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
       };
     }
     else{
-      console.log("Faith", path, method)
       return {
         statusCode: 404,
         body: "Not found" + "\n",
