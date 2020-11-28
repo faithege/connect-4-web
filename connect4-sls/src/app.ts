@@ -7,6 +7,9 @@ const tableName = process.env.DYNAMODB_TABLE;
 
 export const handle: APIGatewayProxyHandler = async (event, _context) => {
 
+  const path = event.path;
+  const method = event.httpMethod;
+
   if (!tableName) {
     console.error('ENV VAR DYNAMODB_TABLE has not been defined')
     return { 
@@ -15,13 +18,28 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
   }
 
   try{
-    const newGame = generateNewGame(generateGameId(), new Date(), "r")
-    const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
+    if (path === '/new' && method === 'GET'){
+      const newGame = generateNewGame(generateGameId(), new Date(), "r")
+      const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(savedGame) + "\n",
-    };
+      return {
+        statusCode: 200,
+        body: JSON.stringify(savedGame) + "\n",
+      };
+    }
+    else if (path === '/game' && method === 'GET'){
+      return {
+        statusCode: 200,
+        body: "Hello Faith" + "\n",
+      };
+    }
+    else{
+      console.log("Faith", path, method)
+      return {
+        statusCode: 404,
+        body: "Not found" + "\n",
+      };
+    }
 
   }
   catch (error) {

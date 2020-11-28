@@ -50,8 +50,9 @@ const serverlessConfiguration: Serverless = {
     handler: {
       handler: 'index.app', //where our handler sits
       events: [
-        httpEvent('hello', 'get'), //events hooked up via api gateway - httpEvent is defined at the top of this file (path then method)
-        httpEvent('bye', 'get'),
+        httpEvent('new', 'post'), //events hooked up via api gateway - httpEvent is defined at the top of this file (path then method)
+        httpEvent('game', 'get'),
+        httpEvent('game', 'put'),
       ]
     }
   },
