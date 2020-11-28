@@ -2,12 +2,10 @@ import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
 import { addGameToDatabase, generateGameId, generateNewGame } from "./database";
 import { DynamoDB } from 'aws-sdk'; 
 
-
+const documentClient = new DynamoDB.DocumentClient();
+const tableName = process.env.DYNAMODB_TABLE;
 
 export const handle: APIGatewayProxyHandler = async (event, _context) => {
-
-  const documentClient = new DynamoDB.DocumentClient();
-  const tableName = process.env.DYNAMODB_TABLE;
 
   if (!tableName) {
     console.error('ENV VAR DYNAMODB_TABLE has not been defined')
@@ -32,4 +30,4 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
 --Flip Player
 --Insert a Counter
 -Need a way to determine starting player - currently hardcoded as red
-/*
+*/
