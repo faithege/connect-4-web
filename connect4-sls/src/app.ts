@@ -14,13 +14,25 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
       body: 'There\'s an internal configuration error' };
   }
 
-  const newGame = generateNewGame(generateGameId(), new Date(), "r")
-  const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
+  try{
+    const newGame = generateNewGame(generateGameId(), new Date(), "r")
+    const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(savedGame) + "\n",
-  };
+    return {
+      statusCode: 200,
+      body: JSON.stringify(savedGame) + "\n",
+    };
+
+  }
+  catch (error) {
+    console.log('error:', error);
+    return { 
+      statusCode: 503, 
+      body: error 
+    };
+  }
+
+  
 }
 
 /* Next Steps
