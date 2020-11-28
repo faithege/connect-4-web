@@ -27,13 +27,13 @@ const serverlessConfiguration: Serverless = {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
     },
-    environment: {
+    environment: { // env vars
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      DYNAMODB_TABLE: '${self:service}-${opt:stage, self:provider.stage}'
+      DYNAMODB_TABLE: '${self:service}-${opt:stage, self:provider.stage}' //can't use references like you can with CFN
     },
     region: 'eu-west-1',
-    profile: 'cbf',
-    iamRoleStatements: [{ 
+    profile: 'cbf', //aws profile
+    iamRoleStatements: [{ //permissions
       Effect: 'Allow',
       Action: [
         'dynamodb:Query',
@@ -48,9 +48,9 @@ const serverlessConfiguration: Serverless = {
   },
   functions: {
     handler: {
-      handler: 'index.app',
+      handler: 'index.app', //where our handler sits
       events: [
-        httpEvent('hello', 'get'),
+        httpEvent('hello', 'get'), //events hooked up via api gateway - httpEvent is defined at the top of this file (path then method)
         httpEvent('bye', 'get'),
       ]
     }
@@ -67,7 +67,7 @@ const serverlessConfiguration: Serverless = {
           },
           AttributeDefinitions: [{ 
             AttributeName: 'gameId',
-            AttributeType: 'N'
+            AttributeType: 'S'
           },{
             AttributeName: 'dateCreated' ,
             AttributeType: 'S'
