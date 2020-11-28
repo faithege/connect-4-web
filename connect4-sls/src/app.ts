@@ -18,7 +18,7 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
   }
 
   try{
-    if (path === '/new' && method === 'GET'){
+    if (path === '/new' && method === 'POST'){
       const newGame = generateNewGame(generateGameId(), new Date(), "r")
       const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
 
