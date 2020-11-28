@@ -3,15 +3,13 @@ import { DocumentClient, ItemList, Key, ScanInput } from "aws-sdk/clients/dynamo
 
 
 export function generateGameId() :GameId {
-    const length = 32 //how long we want the game id -> the bigger the less liiklihood of collision
-    let result = '';
+    const idLength = 32 //how long we want the game id -> the bigger the less liiklihood of collision
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
-    for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
+    const result = Array(idLength).fill(undefined)
+                                    .map(_ => characters.charAt(Math.floor(Math.random() * charactersLength)))
+                                    .join('')
     return result;
-    //task - get rid of for loop, recursion or empty array and map
  }
 
 function generateEmptyBoard(): Board {
