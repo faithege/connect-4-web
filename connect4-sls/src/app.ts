@@ -2,6 +2,13 @@ import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
 import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase } from "./database";
 import { DynamoDB } from 'aws-sdk'; 
 
+function generateResponse(statusCode: Number, body: String){
+  return { 
+    statusCode: statusCode, 
+    body: body + "\n"
+  }
+}
+
 export const handle: APIGatewayProxyHandler = async (event, _context) => {
 
   const documentClient = new DynamoDB.DocumentClient();
@@ -15,21 +22,14 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
 
   if (!tableName) {
     console.error('ENV VAR DYNAMODB_TABLE has not been defined')
-    return { 
-      statusCode: 500, 
-      body: 'There\'s an internal configuration error' 
-    };
+    return generateResponse(500, 'There\'s an internal configuration error')
   }
 
   try{
     if (resource === '/new' && method === 'POST'){
       const newGame = generateNewGame(generateGameId(), new Date(), "r")
       const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(savedGame) + "\n",
-      };
+      return generateResponse(200, JSON.stringify(savedGame))
     }
     else if (resource === '/game/{gameId}' && method === 'GET'){
       const gameId = event.pathParameters?.gameId
@@ -37,39 +37,24 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
       if(gameId){
         const game = await getGameFromDatabase(documentClient, tableName, gameId)
         if (game){
-          return {
-            statusCode: 200,
-            body: JSON.stringify(game)+ "\n",
-          };
+          return generateResponse(200, JSON.stringify(game))
         } else {
-          return {
-            statusCode: 404,
-            body: "Game could not be found"+ "\n",
-          };
+          return generateResponse(404, "Game could not be found")
         }
         
       }
       else {
-        return {
-          statusCode: 400,
-          body: "Missing Game Id" + "\n",
-        };
+        return generateResponse(400, "Missing Game Id")
       }
     }
     else{
-      return {
-        statusCode: 404,
-        body: "Not found" + "\n",
-      };
+      return generateResponse(404, "Not found")
     }
 
   }
   catch (error) {
     console.log('error:', error);
-    return { 
-      statusCode: 503, 
-      body: error 
-    };
+    return generateResponse(503, error)
   }
 
   
