@@ -5,7 +5,7 @@ import { DynamoDB } from 'aws-sdk';
 const express = require('express')
 const app = express()
 
-function generateResponse(statusCode: Number, body: String){
+function generateResponse(statusCode: number, body: string){
   return { 
     statusCode: statusCode, 
     body: body + "\n"
