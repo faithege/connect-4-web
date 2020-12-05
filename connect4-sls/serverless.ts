@@ -50,9 +50,9 @@ const serverlessConfiguration: Serverless = {
     handler: {
       handler: 'index.app', //where our handler sits
       events: [
-        httpEvent('new', 'post'), //events hooked up via api gateway - httpEvent is defined at the top of this file (path then method)
-        httpEvent('game', 'get'),
-        httpEvent('game', 'put'),
+        httpEvent('/new', 'post'), //events hooked up via api gateway - httpEvent is defined at the top of this file (path then method)
+        httpEvent('/game/{gameId}', 'get'),
+        httpEvent('/game', 'put'),
       ]
     }
   },
@@ -69,16 +69,10 @@ const serverlessConfiguration: Serverless = {
           AttributeDefinitions: [{ 
             AttributeName: 'gameId',
             AttributeType: 'S'
-          },{
-            AttributeName: 'dateCreated' ,
-            AttributeType: 'S'
           }],
           KeySchema: [
             { AttributeName: 'gameId', // We are hashing the data to give it a more even distribution
               KeyType: 'HASH' 
-            },{
-              AttributeName: 'dateCreated',
-              KeyType: 'RANGE'
             }
           ]
         }

@@ -1,24 +1,28 @@
 import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
-import { addGameToDatabase, generateGameId, generateNewGame } from "./database";
+import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase } from "./database";
 import { DynamoDB } from 'aws-sdk'; 
-
-const documentClient = new DynamoDB.DocumentClient();
-const tableName = process.env.DYNAMODB_TABLE;
 
 export const handle: APIGatewayProxyHandler = async (event, _context) => {
 
-  const path = event.path;
+  const documentClient = new DynamoDB.DocumentClient();
+  const tableName = process.env.DYNAMODB_TABLE;
+
+  const resource = event.resource;
   const method = event.httpMethod;
+
+  console.log(`event ${JSON.stringify(event)}`)
+  
 
   if (!tableName) {
     console.error('ENV VAR DYNAMODB_TABLE has not been defined')
     return { 
       statusCode: 500, 
-      body: 'There\'s an internal configuration error' };
+      body: 'There\'s an internal configuration error' 
+    };
   }
 
   try{
-    if (path === '/new' && method === 'POST'){
+    if (resource === '/new' && method === 'POST'){
       const newGame = generateNewGame(generateGameId(), new Date(), "r")
       const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
 
@@ -27,11 +31,30 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
         body: JSON.stringify(savedGame) + "\n",
       };
     }
-    else if (path === '/game' && method === 'GET'){
-      return {
-        statusCode: 200,
-        body: "Hello Faith" + "\n",
-      };
+    else if (resource === '/game/{gameId}' && method === 'GET'){
+      const gameId = event.pathParameters?.gameId
+
+      if(gameId){
+        const game = await getGameFromDatabase(documentClient, tableName, gameId)
+        if (game){
+          return {
+            statusCode: 200,
+            body: JSON.stringify(game)+ "\n",
+          };
+        } else {
+          return {
+            statusCode: 404,
+            body: "Game could not be found"+ "\n",
+          };
+        }
+        
+      }
+      else {
+        return {
+          statusCode: 400,
+          body: "Missing Game Id" + "\n",
+        };
+      }
     }
     else{
       return {
@@ -52,10 +75,7 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
   
 }
 
-/* Next Steps
--Given a GameID get a game
--Add Appropriate Routes /new get post put - (game status, start a new game, update an existing game)
--Want our DB calls to be atomic (transactional - all or nothing) so if one part fails, all fail
+/* Next Steps-Want our DB calls to be atomic (transactional - all or nothing) so if one part fails, all fail
 --Flip Player
 --Insert a Counter
 -Need a way to determine starting player - currently hardcoded as red
