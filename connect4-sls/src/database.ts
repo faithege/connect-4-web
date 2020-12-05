@@ -35,16 +35,43 @@ export function generateNewGame(gameId: GameId, dateTime: Date, startingPlayer: 
 
 //arguments that will change most, put to RHS
 export async function addGameToDatabase(documentClient: DocumentClient, tableName:string, game: Game): Promise<Game> {
+    
     await documentClient.put({
         TableName: tableName,
         Item: game
     }).promise()
 
     return game
+
+    //We had tried to make use of ReturnValues to return the updated Item but got the error from AWS
+            // "ReturnValues can only be ALL_OLD or NONE"
     // if (savedGame.Attributes){
     //     return <Game>savedGame.Attributes
     // }
     
     //dealing with theoretical undefined situation
     // return Promise.reject(new Error("Game saving failed"))
+}
+
+export async function getGameFromDatabase(documentClient: DocumentClient, tableName:string, id: string): Promise<Game | undefined>{
+    const params: DocumentClient.GetItemInput = {
+        TableName : tableName,
+        Key: {
+            gameId: id
+        }
+    }
+
+    const response = await documentClient.get(params).promise()
+
+    // Handle the case where an incorrect id is passed in (returns {} and so cannot be cast to a Game type)
+    if(response.Item){
+        // cast to a game
+        return <Game>response.Item
+    }
+    else{
+        return undefined
+    }
+
+    
+
 }
