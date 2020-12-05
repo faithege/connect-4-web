@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
 import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase } from "./database";
 import { DynamoDB } from 'aws-sdk'; 
 
-function generateResponse(statusCode: Number, body: String){
+function generateResponse(statusCode: number, body: string){
   return { 
     statusCode: statusCode, 
     body: body + "\n"
