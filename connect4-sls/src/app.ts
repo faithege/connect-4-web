@@ -29,18 +29,19 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
   }
 
   try{
-    app.post('/new', (req, res) => {
+    app.post('/new', async (req, res) => {
       const newGame = generateNewGame(generateGameId(), new Date(), "r")
       const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
       res.send(generateResponse(200, JSON.stringify(savedGame)))
     })
-    if (resource === '/new' && method === 'POST'){
-      console.log("HELLO WORLD")
-      // const newGame = generateNewGame(generateGameId(), new Date(), "r")
-      // const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
-      // return generateResponse(200, JSON.stringify(savedGame))
-    }
-    else if (resource === '/game/{gameId}' && method === 'GET'){
+    // if (resource === '/new' && method === 'POST'){
+    //   //console.log("HELLO WORLD")
+    //   const newGame = generateNewGame(generateGameId(), new Date(), "r")
+    //   const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
+    //   return generateResponse(200, JSON.stringify(savedGame))
+    // }
+    // else 
+    if (resource === '/game/{gameId}' && method === 'GET'){
       const gameId = event.pathParameters?.gameId
 
       if(gameId){
