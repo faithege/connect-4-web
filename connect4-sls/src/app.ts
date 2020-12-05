@@ -2,6 +2,9 @@ import { APIGatewayProxyHandler } from "aws-lambda/trigger/api-gateway-proxy";
 import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase } from "./database";
 import { DynamoDB } from 'aws-sdk'; 
 
+const express = require('express')
+const app = express()
+
 function generateResponse(statusCode: Number, body: String){
   return { 
     statusCode: statusCode, 
@@ -26,10 +29,16 @@ export const handle: APIGatewayProxyHandler = async (event, _context) => {
   }
 
   try{
-    if (resource === '/new' && method === 'POST'){
+    app.post('/new', (req, res) => {
       const newGame = generateNewGame(generateGameId(), new Date(), "r")
       const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
-      return generateResponse(200, JSON.stringify(savedGame))
+      res.send(generateResponse(200, JSON.stringify(savedGame)))
+    })
+    if (resource === '/new' && method === 'POST'){
+      console.log("HELLO WORLD")
+      // const newGame = generateNewGame(generateGameId(), new Date(), "r")
+      // const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
+      // return generateResponse(200, JSON.stringify(savedGame))
     }
     else if (resource === '/game/{gameId}' && method === 'GET'){
       const gameId = event.pathParameters?.gameId
