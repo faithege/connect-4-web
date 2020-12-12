@@ -36,50 +36,41 @@ export async function getGame(documentClient: DocumentClient, tableName: string,
 
 
 
-export async function updateGame(documentClient: DocumentClient, tableName: string, gameId: string, column: number, player: Player): Promise<CustomResponse>{
-  //get game from db
-      //check exists
-      //check current player from db matches incoming player
-  //place counter from game using logic
-  //update db
+// export async function updateGame(documentClient: DocumentClient, tableName: string, gameId: string, column: number, player: Player): Promise<CustomResponse>{
+//   //get game from db
+//       //check exists
+//       //check current player from db matches incoming player
+//   //place counter from game using logic
+//   //update db
 
-  //check winner
-  
-}
+//   //check winner
 
-  try{
-   if (resource === '/game' && method === 'PUT'){
-      //update board logic here
-      const mockGameUpdate: Game = {
-        gameId: 'vQCY1iMbai8j23FV22UDoo2bBGVErTRv',
-        dateCreated: '2020-12-01T20:23:09.665Z',
-        currentPlayer: 'r',
-        boardState: [ 
-          [".",".",".",".",".",".","."],
-          [".",".",".",".",".",".","."],
-          [".",".",".",".",".",".","."],
-          [".",".",".",".",".",".","."],
-          [".",".",".",".",".",".","."],
-          ["r","y",".",".",".",".","."]
-          ]
-      }
 
-      const savedGame = await updateGameInDatabase(documentClient, tableName, mockGameUpdate)
+//    if (resource === '/game' && method === 'PUT'){
+//       //update board logic here
+//       const mockGameUpdate: Game = {
+//         gameId: 'vQCY1iMbai8j23FV22UDoo2bBGVErTRv',
+//         dateCreated: '2020-12-01T20:23:09.665Z',
+//         currentPlayer: 'r',
+//         boardState: [ 
+//           [".",".",".",".",".",".","."],
+//           [".",".",".",".",".",".","."],
+//           [".",".",".",".",".",".","."],
+//           [".",".",".",".",".",".","."],
+//           [".",".",".",".",".",".","."],
+//           ["r","y",".",".",".",".","."]
+//           ]
+//       }
 
-      // if gaame save successful
-      //check for winner
-      //otherwise switch player
-      const nextPlayer = switchCurrentPlayer(mockGameUpdate.currentPlayer)
-      return generateResponse(200, JSON.stringify({
-                                      game: savedGame,
-                                      nextPlayer: nextPlayer
-                                    }))
-    }
-  }
-  catch (error) {
-    console.log('error:', error);
-    return generateResponse(503, error)
-  }
+//       const savedGame = await updateGameInDatabase(documentClient, tableName, mockGameUpdate)
 
-  
-}
+//       // if gaame save successful
+//       //check for winner
+//       //otherwise switch player
+//       const nextPlayer = switchCurrentPlayer(mockGameUpdate.currentPlayer)
+//       return generateResponse(200, JSON.stringify({
+//                                       game: savedGame,
+//                                       nextPlayer: nextPlayer
+//                                     }))
+//     }
+

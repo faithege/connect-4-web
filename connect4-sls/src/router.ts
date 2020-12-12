@@ -21,8 +21,14 @@ function adapter(fn:(req: Request, tableName: string) => Promise<CustomResponse>
             console.error('ENV VAR DYNAMODB_TABLE has not been defined')
             res.status(500).json('There\'s an internal configuration error')
         } else {
-            const response = await fn(req, gameTableName) //output a string never undefined at this point
-            responseToExpress(res, response)
+            try {
+                const response = await fn(req, gameTableName) //output a string never undefined at this point
+                responseToExpress(res, response)
+            }
+            catch (error) {
+                console.error('error:', error);
+                return res.status(503).json(error)
+              }
         }
     }
 }
