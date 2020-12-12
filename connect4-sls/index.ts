@@ -1,4 +1,4 @@
 import 'source-map-support/register';
-import { handle } from './src/app';
+import { handler } from './src/router';
 
-export const app = handle;
+export const app = handler;
