@@ -72,6 +72,29 @@ export async function getGameFromDatabase(documentClient: DocumentClient, tableN
         return undefined
     }
 
-    
+}
+
+export async function updateGameInDatabase(documentClient: DocumentClient, tableName:string, gameId: string, updatedBoard: Board, newPlayer: Player): Promise<Game | undefined>{
+
+    const params = {
+        TableName: tableName,
+        Key: { gameId : gameId },
+        UpdateExpression: 'set #board = :b, #player = :p ',
+        ExpressionAttributeNames: {'#board' : 'boardState', '#player' : 'currentPlayer'},
+        ExpressionAttributeValues: {
+          ':b' : updatedBoard,
+          ':p' : newPlayer,
+        },
+        ReturnValues: 'ALL_NEW'
+    }
+
+    const savedGame = await documentClient.update(params).promise();
+
+    if (savedGame.Attributes){
+        return <Game>savedGame.Attributes
+    }
+    else{
+        return undefined // what is the error happening here? Add better handling/logging here - should give as much detail as possible
+    }
 
 }

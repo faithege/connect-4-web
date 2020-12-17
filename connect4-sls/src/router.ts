@@ -1,6 +1,7 @@
 import * as serverless from 'serverless-http'
+import * as bodyParser from 'body-parser'
 import * as express from 'express'
-import { CustomResponse, getGame, postNewGame } from './app'
+import { CustomResponse, getGame, postNewGame, updateExistingGame } from './app'
 import { Request, Response } from 'express';
 import { DynamoDB } from 'aws-sdk';
 
@@ -9,6 +10,8 @@ import { DynamoDB } from 'aws-sdk';
 const app = express()
 const documentClient = new DynamoDB.DocumentClient();
 const gameTableName = process.env.DYNAMODB_TABLE;
+
+app.use(bodyParser.json({ strict: false }));
 
 
 function responseToExpress(nodeResponse: Response, response: CustomResponse){
@@ -41,6 +44,14 @@ app.post('/new', adapter(async function(req, tableName){
 app.get('/game/:gameId', adapter(async function(req, tableName){
     const gameId: string = req.params.gameId
     return await getGame(documentClient, tableName, gameId)
+})
+)
+
+app.put('/game', adapter(async function(req, tableName){
+    const gameId = req.body.gameId
+    const column = req.body.column
+    const currentPlayerClient = req.body.currentPlayer
+    return await updateExistingGame(documentClient, tableName, gameId, currentPlayerClient, column)
 })
 )
     
