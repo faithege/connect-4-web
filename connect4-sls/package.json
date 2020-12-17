@@ -10,9 +10,12 @@
     "invoke": "serverless invoke -f handler"
   },
   "dependencies": {
+    "express": "^4.17.1",
+    "serverless-http": "^2.6.0",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
+    "@types/express": "^4.17.9",
     "@types/aws-lambda": "^8.10.64",
     "@types/node": "^14.14.6",
     "@types/serverless": "^1.78.8",

@@ -74,16 +74,16 @@ export async function getGameFromDatabase(documentClient: DocumentClient, tableN
 
 }
 
-export async function updateGameInDatabase(documentClient: DocumentClient, tableName:string, updatedGame: Game): Promise<Game | undefined>{
+export async function updateGameInDatabase(documentClient: DocumentClient, tableName:string, gameId: string, updatedBoard: Board, newPlayer: Player): Promise<Game | undefined>{
 
     const params = {
         TableName: tableName,
-        Key: { gameId : updatedGame.gameId },
+        Key: { gameId : gameId },
         UpdateExpression: 'set #board = :b, #player = :p ',
         ExpressionAttributeNames: {'#board' : 'boardState', '#player' : 'currentPlayer'},
         ExpressionAttributeValues: {
-          ':b' : updatedGame.boardState,
-          ':p' : updatedGame.currentPlayer,
+          ':b' : updatedBoard,
+          ':p' : newPlayer,
         },
         ReturnValues: 'ALL_NEW'
     }
@@ -94,7 +94,7 @@ export async function updateGameInDatabase(documentClient: DocumentClient, table
         return <Game>savedGame.Attributes
     }
     else{
-        return undefined
+        return undefined // what is the error happening here? Add better handling/logging here - should give as much detail as possible
     }
 
 }
