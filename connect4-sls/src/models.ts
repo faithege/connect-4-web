@@ -10,5 +10,7 @@ export interface Game {
     dateCreated:string
     boardState: Board
     currentPlayer: Player
+    connectionIdR: string | undefined
+    connectionIdY: string | undefined
 }
 

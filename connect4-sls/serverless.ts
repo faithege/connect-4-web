@@ -56,6 +56,21 @@ const serverlessConfiguration: Serverless = {
         // httpEvent('/game/{gameId}', 'get'),
         // httpEvent('/game', 'put'),
       ]
+    },
+    connectionHandler:{
+    handler: 'index.connectionHandler',
+    events: [
+      {
+        websocket:{
+          route: '$connect'
+        }
+      },
+      {
+        websocket:{
+          route: '$disconnect'
+        }
+      }
+    ]
     }
   },
   resources: {

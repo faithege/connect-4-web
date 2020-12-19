@@ -29,7 +29,9 @@ export function generateNewGame(gameId: GameId, dateTime: Date, startingPlayer: 
         gameId: gameId,
         dateCreated: dateTime.toISOString(), //needs to be a string for the ddb
         currentPlayer: startingPlayer,
-        boardState: generateEmptyBoard()
+        boardState: generateEmptyBoard(),
+        connectionIdR: undefined,
+        connectionIdY: undefined
     }
 }
 
@@ -89,6 +91,32 @@ export async function updateGameInDatabase(documentClient: DocumentClient, table
     }
 
     const savedGame = await documentClient.update(params).promise();
+
+    if (savedGame.Attributes){
+        return <Game>savedGame.Attributes
+    }
+    else{
+        return undefined // what is the error happening here? Add better handling/logging here - should give as much detail as possible
+    }
+
+}
+
+export async function updateConnectionId(documentClient: DocumentClient, tableName:string, gameId: string, newPlayer: Player, connectionId: string): Promise<Game | undefined>{
+    const params = {
+        TableName: tableName,
+        Key: { gameId : gameId },
+        UpdateExpression: 'set #connection = :c',
+        ExpressionAttributeNames: {'#connection' : `connectionId${newPlayer.toUpperCase()}`},
+        ExpressionAttributeValues: {
+          ':c' : connectionId
+        },
+        ReturnValues: 'ALL_NEW'
+    }
+
+    console.log(JSON.stringify(params))
+
+    const savedGame = await documentClient.update(params).promise();
+    console.log(`${JSON.stringify(savedGame)}`)
 
     if (savedGame.Attributes){
         return <Game>savedGame.Attributes
