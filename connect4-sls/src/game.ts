@@ -1,13 +1,13 @@
 import { Player, Board, Column, Place } from "./models"
 
-export function switchCurrentPlayer(currentPlayer: Player): Player { //make into switch case
-    if(currentPlayer === "r") {
-        return "y"
-    }
-    else {
-        return "r"
-    }
-
+export function switchCurrentPlayer(currentPlayer: Player): Player | undefined {
+    switch(currentPlayer) {
+        case "r":
+            return "y"
+        case "y":
+            return "r"
+        default:
+            return undefined
 }
 
 function selectColumn(board:Board, columnIndex: number): Column{
