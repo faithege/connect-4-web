@@ -1,13 +1,12 @@
 import { Player, Board, Column, Place } from "./models"
 
-export function switchCurrentPlayer(currentPlayer: Player): Player | undefined {
+export function switchCurrentPlayer(currentPlayer: Player): Player {
     switch(currentPlayer) {
         case "r":
             return "y"
         case "y":
             return "r"
-        default:
-            return undefined
+    }
 }
 
 function selectColumn(board:Board, columnIndex: number): Column{
@@ -125,7 +124,11 @@ export function slice2D<T>(inputBox: T[][], xIndex: number, yIndex: number, boxS
     }
 }
 
-function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][]{
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue { //put into utils
+    return value !== null && value !== undefined;
+}
+
+function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][] {
     // create all boxes then filter for correct sizes
 
     //edge case handling
@@ -140,7 +143,7 @@ function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][]{
     
     // Filter for the ones of the correct size
     // WHY DOES BOXES DROP UNDEFINED UNION TYPE
-    return boxes.filter(box => box !== undefined)
+    return boxes.filter(notEmpty)
 
    
 }
@@ -165,7 +168,7 @@ function checkWindowsForWinner(windows: Place[][]): Player | undefined {
 }
 
 
-function checkBoardForWinner(board:Board): Player | undefined {
+export function checkBoardForWinner(board:Board): Player | undefined {
     // We didn't need to define a type here but it makes it helpful in understanding the flow of the code
     const winningLength = 4
     
