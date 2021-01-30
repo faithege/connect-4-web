@@ -14,3 +14,26 @@ export interface Game {
     connectionIdY: string | undefined
 }
 
+export interface ClientMessage {
+    gameId: string
+    playerId: Player
+    messageType: "hello" | "column"
+}
+
+export interface ColumnClientMessage extends ClientMessage{
+    // This is 0-indexed by the FE
+    column: number 
+}
+
+export interface ServerMessage {
+    messageType: "error" | "game"
+}
+
+export interface ServerError extends ServerMessage{
+    error: string
+}
+
+export interface ServerGame extends ServerMessage{
+    boardState: Board
+    currentPlayer: Player
+}

@@ -61,7 +61,7 @@ function findEmptyRow(column:Column): number | undefined{
     return row === -1 ? undefined : 5 - row // need to re-reverse the order
 }
 
-function placeCounter(board:Board, columnIndex: number, player: Player): Board{
+export function placeCounter(board:Board, columnIndex: number, player: Player): Board{
     const column = selectColumn(board, columnIndex)
     const rowIndex = findEmptyRow(column)
 

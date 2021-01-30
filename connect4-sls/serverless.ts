@@ -69,6 +69,11 @@ const serverlessConfiguration: Serverless = {
         websocket:{
           route: '$disconnect'
         }
+      },
+      {
+        websocket:{
+          route: '$default'
+        }
       }
     ]
     }
