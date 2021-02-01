@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDB , ApiGatewayManagementApi } from "aws-sdk";
 import { getGameFromDatabase, updateConnectionId, updateGameInDatabase } from "./database";
-import { placeCounter, switchCurrentPlayer } from "./game";
+import { checkBoardForWinner, placeCounter, switchCurrentPlayer } from "./game";
 import { Board, Game, Player, ServerError, ServerGame, ServerMessage } from "./models";
 import { getConnectionId, isClientMessage, isJsonString } from "./utils";
 
@@ -106,13 +106,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
            
             const updatedBoard = placeCounter(game.boardState, payload.column, game.currentPlayer)  // FE will ensure column is 0-indexed
             const nextPlayer = switchCurrentPlayer(game.currentPlayer)
+            const winner = checkBoardForWinner(updatedBoard)
 
             //update db
             const updatedGame = await updateGameInDatabase(documentClient, gameTableName, game.gameId, updatedBoard, nextPlayer)
 
             if (updatedGame){
-              // make a helper function here to broadcast message to all(both) clients
-              broadcastGameMessage(context.domainName!, context.stage, updatedGame)
+              winner ?
+              broadcastMessage(context.domainName!, context.stage, updatedGame, generateWinnerMessage(updatedGame.boardState, winner)) :
+              broadcastMessage(context.domainName!, context.stage, updatedGame, generateGameMessage(updatedGame.boardState, updatedGame.currentPlayer))
             }
             else{
               await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage("Unable to update game"))
@@ -160,12 +162,20 @@ function generateGameMessage(board: Board, currentPlayer: Player): ServerGame{
   }
 }
 
-async function broadcastGameMessage(domainName:string, stage:string, game: Game) {
+function generateWinnerMessage(board: Board, winner: Player): ServerGame{
+  return {
+    messageType: "winner",
+    boardState: board,
+    currentPlayer: winner
+  }
+}
+
+async function broadcastMessage(domainName:string, stage:string, game: Game, message: ServerMessage) {
   if(game.connectionIdR){
-    await sendMessageToClient(domainName, stage, game.connectionIdR, generateGameMessage(game.boardState, game.currentPlayer))
+    await sendMessageToClient(domainName, stage, game.connectionIdR, message)
   }
   if(game.connectionIdY){
-    await sendMessageToClient(domainName, stage, game.connectionIdY, generateGameMessage(game.boardState, game.currentPlayer))
+    await sendMessageToClient(domainName, stage, game.connectionIdY, message)
   }
 }
 

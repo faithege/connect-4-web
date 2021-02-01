@@ -26,7 +26,7 @@ export interface ColumnClientMessage extends ClientMessage{
 }
 
 export interface ServerMessage {
-    messageType: "error" | "game"
+    messageType: "error" | "game" | "winner"
 }
 
 export interface ServerError extends ServerMessage{
@@ -36,4 +36,9 @@ export interface ServerError extends ServerMessage{
 export interface ServerGame extends ServerMessage{
     boardState: Board
     currentPlayer: Player
+}
+
+export interface ServerWinner extends ServerMessage{
+    boardState: Board
+    winner: Player
 }
