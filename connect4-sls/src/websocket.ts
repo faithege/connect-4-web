@@ -1,12 +1,12 @@
-import { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult} from "aws-lambda";
 import { DynamoDB , ApiGatewayManagementApi } from "aws-sdk";
 import { getGameFromDatabase, updateConnectionId, updateGameInDatabase } from "./database";
 import { checkBoardForWinner, placeCounter, switchCurrentPlayer } from "./game";
-import { Board, Game, Player, ServerError, ServerGame, ServerMessage } from "./models";
-import { getConnectionId, isClientMessage, isJsonString } from "./utils";
+import { Board, ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerGame, ServerGameMessage, ServerMessage, ServerWinner, ServerWinnerMessage } from "./models";
+import { getConnectionId, isClientMessage, isJsonString, isServerErrorMessage } from "./utils";
 
 const documentClient = new DynamoDB.DocumentClient();
-const gameTableName = process.env.DYNAMODB_TABLE;
+const maybeGameTableName = process.env.DYNAMODB_TABLE; // may or may not be defined
 
 export function generateResponseLog(statusCode: number, body: string | object | undefined): APIGatewayProxyResult{
  const response = { 
@@ -25,10 +25,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   console.log(JSON.stringify(context))
   console.log(JSON.stringify(event))
 
-  if (!gameTableName){
-    console.error("DYNAMOO_TABLE undefined")
+  if (!maybeGameTableName){
+    console.error("DYNAMO_TABLE undefined")
     return generateResponseLog(503,"There\'s an internal configuration error")
-  }       
+  }   
+  
+  const gameTableName = maybeGameTableName //at this point we know that gameTableName exists
 
   try {
     // Creating a websocket session ie store the connection id
@@ -56,81 +58,53 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       // Delete Session
       
     } else {
-      if(event.body){
+      const payloadGameOrError: [ClientMessage, Game] | ServerErrorMessage = await verifyClientMessage(gameTableName, event)
 
-        // verify JSON format
-        if (!isJsonString(event.body)){
-          await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage("Invalid JSON"))
-        }
+      if (isServerErrorMessage(payloadGameOrError)){
+        const error: ServerErrorMessage = payloadGameOrError
+        sendMessageToClient (context.domainName!, context.stage, sessionId, error)
+        return
+      }
 
-        const payload = JSON.parse(event.body);
-        console.log(payload)
+      const [payload, game]: [ClientMessage, Game] = payloadGameOrError
 
-        // verify necessary message attributes provided
-        if (!isClientMessage(payload)) {
-          await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage("Invalid message format"))
-        }
 
-        // verify game id
-        const gameId = payload.gameId
-        const playerId = payload.playerId
-        const game = await getGameFromDatabase(documentClient, gameTableName, gameId)
-        if (!game){
-          console.log("Game does not exist")
-          disconnectClient(context.domainName!, context.stage, sessionId)
-          return generateResponseLog(400, "Game does not exist")
-        }
-
-        // verify connection
-        const gameConnectionId = getConnectionId(game, playerId)
-
-        if (gameConnectionId !== sessionId){
-          console.log("Illegal connection id")
-          disconnectClient(context.domainName!, context.stage, sessionId)
-        }
-
-        //different logic here - put above code into its own function
-
-        switch(payload.messageType) {
-          case "hello":
-            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateGameMessage(game.boardState, game.currentPlayer))
+      switch(payload.type) {
+        case ClientHello:
+          await sendMessageToClient(context.domainName!, context.stage, sessionId, generateGameMessage(game.boardState, game.currentPlayer))
+          break;
+        case ClientColumn:
+          //verify correct player making move
+          if (payload.playerId !== game.currentPlayer){
+            console.log(`Incorrect player making move, it is ${game.currentPlayer}'s turn`)
+            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage(`It is ${game.currentPlayer}'s turn`))
+            //return generateResponseLog(400, "Incorrect player")
             break;
-          case "column":
-            //verify correct player making move
-            if (playerId !== game.currentPlayer){
-              console.log(`Incorrect player making move, it is ${game.currentPlayer}'s turn`)
-              await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage(`It is ${game.currentPlayer}'s turn`))
-              //return generateResponseLog(400, "Incorrect player")
-              break;
-            }
-           
-            const updatedBoard = placeCounter(game.boardState, payload.column, game.currentPlayer)  // FE will ensure column is 0-indexed
-            const nextPlayer = switchCurrentPlayer(game.currentPlayer)
-            const winner = checkBoardForWinner(updatedBoard)
+          }
+          
+          const updatedBoard = placeCounter(game.boardState, payload.column, game.currentPlayer)  // FE will ensure column is 0-indexed
+          const nextPlayer = switchCurrentPlayer(game.currentPlayer)
+          const winner = checkBoardForWinner(updatedBoard)
 
-            //update db
-            const updatedGame = await updateGameInDatabase(documentClient, gameTableName, game.gameId, updatedBoard, nextPlayer)
+          //update db
+          const updatedGame = await updateGameInDatabase(documentClient, gameTableName, game.gameId, updatedBoard, nextPlayer)
 
-            if (updatedGame){
-              winner ?
-              broadcastMessage(context.domainName!, context.stage, updatedGame, generateWinnerMessage(updatedGame.boardState, winner)) :
-              broadcastMessage(context.domainName!, context.stage, updatedGame, generateGameMessage(updatedGame.boardState, updatedGame.currentPlayer))
-            }
-            else{
-              await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage("Unable to update game"))
-            }
-            break;
+          if (updatedGame){
+            const message = winner ? generateWinnerMessage(game.boardState, winner) : generateGameMessage(game.boardState, game.currentPlayer)
+            await broadcastMessage(context.domainName!, context.stage, updatedGame, message) 
+          }
+          else{
+            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage("Unable to update game"))
+          }
+          break;
 
-        }
+      }
 
         
 
-      }
-      
-      
+    }
       
     
-    }
   } catch (e) {
     console.error("$default Error: %j\n%o", event.body, e);
     return generateResponseLog(500, `Malformed event body: ${event.body}`)
@@ -146,31 +120,73 @@ export const handler: APIGatewayProxyHandler = async (event) => {
  *
  */
 
+async function verifyClientMessage(table: string, event: APIGatewayProxyEvent): Promise<[ClientMessage, Game] | ServerErrorMessage> {
+  const context = event.requestContext
+  const sessionId = context.connectionId!
 
-function generateErrorMessage(errorString: string): ServerError{
+  if(!event.body){
+    return generateErrorMessage("Body missing")
+  }
+
+  // verify JSON format
+  if (!isJsonString(event.body)){
+    return generateErrorMessage("Invalid JSON")
+  }
+
+  const payload = JSON.parse(event.body);
+  console.log(payload)
+
+  // verify necessary message attributes provided
+  if (!isClientMessage(payload)) {
+    return generateErrorMessage("Invalid message format")
+  }
+
+  // verify game id
+  const gameId = payload.gameId
+  const playerId = payload.playerId
+  const game = await getGameFromDatabase(documentClient, table, gameId)
+  if (!game){
+    return generateErrorMessage("Game does not exist", true)
+  }
+
+  // verify connection
+  const gameConnectionId = getConnectionId(game, playerId)
+
+  if (gameConnectionId !== sessionId){
+    return generateErrorMessage("Illegal connection id", true)
+  }
+
+  return [payload, game];
+
+}
+
+
+function generateErrorMessage(errorString: string, shouldDisconnect: boolean = false): ServerErrorMessage{
   return {
-    messageType: "error",
-    error: errorString
+    type: ServerError,
+    error: errorString,
+    disconnect: shouldDisconnect
   }
 }
 
-function generateGameMessage(board: Board, currentPlayer: Player): ServerGame{
+function generateGameMessage(board: Board, currentPlayer: Player): ServerGameMessage{
   return {
-    messageType: "game",
+    type: ServerGame,
     boardState: board,
     currentPlayer: currentPlayer
   }
 }
 
-function generateWinnerMessage(board: Board, winner: Player): ServerGame{
+function generateWinnerMessage(board: Board, winner: Player): ServerWinnerMessage{
   return {
-    messageType: "winner",
+    type: ServerWinner,
     boardState: board,
-    currentPlayer: winner
+    winner: winner
   }
 }
 
 async function broadcastMessage(domainName:string, stage:string, game: Game, message: ServerMessage) {
+
   if(game.connectionIdR){
     await sendMessageToClient(domainName, stage, game.connectionIdR, message)
   }
@@ -182,20 +198,21 @@ async function broadcastMessage(domainName:string, stage:string, game: Game, mes
 async function sendMessageToClient(domainName:string, stage:string, connectionId: string, message: ServerMessage) {
   const WebsocketAPIGatewayAddress = `https://${domainName}/${stage}`;
   const apiGateway = new ApiGatewayManagementApi({ endpoint: WebsocketAPIGatewayAddress });
-
-  await apiGateway.postToConnection({
-    ConnectionId: connectionId,
-    Data: JSON.stringify(message),
-  }).promise();
-}
-
-async function disconnectClient(domainName:string, stage:string, connectionId: string) {
-  const WebsocketAPIGatewayAddress = `https://${domainName}/${stage}`;
-  const apiGateway = new ApiGatewayManagementApi({ endpoint: WebsocketAPIGatewayAddress });
-
-  await apiGateway.deleteConnection({
-    ConnectionId: connectionId
-  }).promise();
+  
+  
+  if (message.type === ServerError && message.disconnect){
+    console.log(`Disconnecting user with connection id ${connectionId} because of error: ${message.error}`)
+    await apiGateway.deleteConnection({
+      ConnectionId: connectionId
+    }).promise();
+  }
+  else{
+    console.log(`Connection id ${connectionId}: ${message}`)
+    await apiGateway.postToConnection({
+      ConnectionId: connectionId,
+      Data: JSON.stringify(message),
+    }).promise();
+  }
 }
 
 
