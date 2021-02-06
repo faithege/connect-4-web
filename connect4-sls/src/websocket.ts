@@ -2,8 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult} fr
 import { DynamoDB , ApiGatewayManagementApi } from "aws-sdk";
 import { getGameFromDatabase, updateConnectionId, updateGameInDatabase } from "./database";
 import { checkBoardForWinner, placeCounter, switchCurrentPlayer } from "./game";
-import { Board, ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerGame, ServerGameMessage, ServerMessage, ServerWinner, ServerWinnerMessage } from "./models";
-import { getConnectionId, isClientMessage, isJsonString, isServerErrorMessage } from "./utils";
+import { ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerMessage } from "./models";
+import { generateErrorMessage, generateGameMessage, generateWinnerMessage, getConnectionId, isClientMessage, isJsonString, isServerErrorMessage } from "./utils";
 
 const documentClient = new DynamoDB.DocumentClient();
 const maybeGameTableName = process.env.DYNAMODB_TABLE; // may or may not be defined
@@ -158,31 +158,6 @@ async function verifyClientMessage(table: string, event: APIGatewayProxyEvent): 
 
   return [payload, game];
 
-}
-
-
-function generateErrorMessage(errorString: string, shouldDisconnect: boolean = false): ServerErrorMessage{
-  return {
-    type: ServerError,
-    error: errorString,
-    disconnect: shouldDisconnect
-  }
-}
-
-function generateGameMessage(board: Board, currentPlayer: Player): ServerGameMessage{
-  return {
-    type: ServerGame,
-    boardState: board,
-    currentPlayer: currentPlayer
-  }
-}
-
-function generateWinnerMessage(board: Board, winner: Player): ServerWinnerMessage{
-  return {
-    type: ServerWinner,
-    boardState: board,
-    winner: winner
-  }
 }
 
 async function broadcastMessage(domainName:string, stage:string, game: Game, message: ServerMessage) {

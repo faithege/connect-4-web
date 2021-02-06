@@ -1,4 +1,4 @@
-import { ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage } from "./models";
+import { Board, ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerGame, ServerGameMessage, ServerWinner, ServerWinnerMessage } from "./models";
 
 export function isJsonString(str: string): boolean {
     try {
@@ -28,3 +28,28 @@ export function isClientMessage(value: ClientMessage ): value is ClientMessage {
 export function isServerErrorMessage(value: any ): value is ServerErrorMessage { 
 return 'type' in value && value.type === ServerError;
 }
+
+
+export function generateErrorMessage(errorString: string, shouldDisconnect: boolean = false): ServerErrorMessage{
+    return {
+      type: ServerError,
+      error: errorString,
+      disconnect: shouldDisconnect
+    }
+  }
+  
+export function generateGameMessage(board: Board, currentPlayer: Player): ServerGameMessage{
+    return {
+      type: ServerGame,
+      boardState: board,
+      currentPlayer: currentPlayer
+    }
+  }
+  
+export function generateWinnerMessage(board: Board, winner: Player): ServerWinnerMessage{
+    return {
+      type: ServerWinner,
+      boardState: board,
+      winner: winner
+    }
+  }
