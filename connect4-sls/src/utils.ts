@@ -1,4 +1,4 @@
-import { ClientMessage, Game, Player } from "./models";
+import { ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage } from "./models";
 
 export function isJsonString(str: string): boolean {
     try {
@@ -20,6 +20,11 @@ export function isClientMessage(value: ClientMessage ): value is ClientMessage {
     return typeof value.gameId === 'string' && 
             typeof value.playerId === 'string' &&
             ( value.playerId === 'r' || value.playerId === 'y') &&
-            typeof value.messageType === 'string' && 
-            ( value.messageType === 'hello' || value.messageType=== 'column');
+            typeof value.type === 'string' && 
+            ( value.type === ClientHello || value.type=== ClientColumn);
   }
+
+
+export function isServerErrorMessage(value: any ): value is ServerErrorMessage { 
+return 'type' in value && value.type === ServerError;
+}

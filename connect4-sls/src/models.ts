@@ -14,31 +14,54 @@ export interface Game {
     connectionIdY: string | undefined
 }
 
-export interface ClientMessage {
-    gameId: string
-    playerId: Player
-    messageType: "hello" | "column"
+interface Message {
+	type: string;
 }
 
-export interface ColumnClientMessage extends ClientMessage{
+export const ClientHello = "CLIENT_HELLO" as const;
+export const ClientColumn = "CLIENT_COLUMN" as const;
+
+export interface ClientMessageFields extends Message{
+    gameId: string
+    playerId: Player
+}
+
+export interface ColumnClientMessage extends ClientMessageFields{
     // This is 0-indexed by the FE
+    type: typeof ClientColumn
     column: number 
 }
 
-export interface ServerMessage {
-    messageType: "error" | "game" | "winner"
+export interface HelloClientMessage extends ClientMessageFields{
+    // This is 0-indexed by the FE
+    type: typeof ClientHello
 }
 
-export interface ServerError extends ServerMessage{
+export type ClientMessage = ColumnClientMessage | HelloClientMessage;
+
+export const ServerError = "SERVER_ERROR" as const;
+export const ServerGame = "SERVER_GAME" as const;
+export const ServerWinner= "SERVER_WINNER" as const;
+
+
+export interface ServerErrorMessage extends Message{
+    type: typeof ServerError
     error: string
+    disconnect: boolean
 }
 
-export interface ServerGame extends ServerMessage{
+export interface ServerGameMessage extends Message{
+    type: typeof ServerGame
     boardState: Board
     currentPlayer: Player
 }
 
-export interface ServerWinner extends ServerMessage{
+export interface ServerWinnerMessage extends Message{
+    type: typeof ServerWinner
     boardState: Board
     winner: Player
 }
+
+export type ServerMessage = ServerErrorMessage | ServerGameMessage | ServerWinnerMessage
+
+
