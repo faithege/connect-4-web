@@ -76,8 +76,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         case ClientColumn:
           //verify correct player making move
           if (payload.playerId !== game.currentPlayer){
-            console.log(`Incorrect player making move, it is ${game.currentPlayer}'s turn`)
-            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage(`It is ${game.currentPlayer}'s turn`))
+            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage(`Incorrect player making move, it is ${game.currentPlayer}'s turn`))
             //return generateResponseLog(400, "Incorrect player")
             break;
           }
@@ -119,6 +118,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
  * Server -> Client Messaging features
  *
  */
+
 
 async function verifyClientMessage(table: string, event: APIGatewayProxyEvent): Promise<[ClientMessage, Game] | ServerErrorMessage> {
   const context = event.requestContext
