@@ -1,14 +1,23 @@
 <template>
-  <div class="hello">
+  <Main class="hello">
     <h1>Connect Four</h1>
-    <div v-for="(row, index) in board" :key="index">
+    <Section v-for="(row, index) in board" :key="index">
       <Row :row="row"/>
-    </div>
-  </div>
+    </Section>
+    <Section>
+      <!-- Extract this to a separate component, heading too -->
+      <b-form-select v-model="selectedColumn" :options="columnChoices">
+        <template slot="first">
+        <option disabled>  -- Please select column choice -- </option>
+        </template>
+      </b-form-select>
+    </Section>
+  </Main>
 </template>
 
 <script>
 import Row from './Row.vue'
+// import { b-dropdown } from 'bootstrap-vue'
 
 export default {
   name: 'Board',
@@ -25,16 +34,12 @@ export default {
         [".",".",".",".",".",".","."],
         [".",".","y",".",".",".","."],
         [".","r","r","y",".",".","."]
-        ]
+        ],
+      columnChoices: [1,2,3,4,5,6,7],
+      selectedColumn: null
     }
   },
   methods:{
-    generateRows: function() {
-      // const rowStrings = this.board.map(row => row.join(' '))
-      const rowStrings = this.board.map(row => 
-                                          row.map(place => this.getPlaceImageUrl(place)))
-      return rowStrings 
-    }
   },
 }
 </script>
