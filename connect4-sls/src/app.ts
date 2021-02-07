@@ -1,5 +1,5 @@
 import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase, updateGameInDatabase } from "./database";
-import { Game, Player } from "./models";
+import { Player } from "./models";
 import { processPlayerMove, switchCurrentPlayer } from "./game";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 

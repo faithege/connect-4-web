@@ -1,5 +1,5 @@
 import { Board, Game, GameId, Player } from "./models";
-import { DocumentClient, ItemList, Key, ScanInput } from "aws-sdk/clients/dynamodb";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 
 export function generateGameId() :GameId {

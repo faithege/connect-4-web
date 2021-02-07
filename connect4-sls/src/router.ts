@@ -36,7 +36,7 @@ function adapter(fn:(req: Request, tableName: string) => Promise<CustomResponse>
     }
 }
 
-app.post('/new', adapter(async function(req, tableName){
+app.post('/new', adapter(async function(_, tableName){
     return await postNewGame(documentClient, tableName)
 })
 )

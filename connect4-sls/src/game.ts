@@ -1,13 +1,12 @@
 import { Player, Board, Column, Place } from "./models"
 
-export function switchCurrentPlayer(currentPlayer: Player): Player { //make into switch case
-    if(currentPlayer === "r") {
-        return "y"
+export function switchCurrentPlayer(currentPlayer: Player): Player {
+    switch(currentPlayer) {
+        case "r":
+            return "y"
+        case "y":
+            return "r"
     }
-    else {
-        return "r"
-    }
-
 }
 
 function selectColumn(board:Board, columnIndex: number): Column{
@@ -62,7 +61,7 @@ function findEmptyRow(column:Column): number | undefined{
     return row === -1 ? undefined : 5 - row // need to re-reverse the order
 }
 
-function placeCounter(board:Board, columnIndex: number, player: Player): Board{
+export function placeCounter(board:Board, columnIndex: number, player: Player): Board{
     const column = selectColumn(board, columnIndex)
     const rowIndex = findEmptyRow(column)
 
@@ -125,7 +124,11 @@ export function slice2D<T>(inputBox: T[][], xIndex: number, yIndex: number, boxS
     }
 }
 
-function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][]{
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue { //put into utils
+    return value !== null && value !== undefined;
+}
+
+function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][] {
     // create all boxes then filter for correct sizes
 
     //edge case handling
@@ -140,7 +143,7 @@ function slidingBox<T>(inputBox: T[][], boxWindowSize: number): T[][][]{
     
     // Filter for the ones of the correct size
     // WHY DOES BOXES DROP UNDEFINED UNION TYPE
-    return boxes.filter(box => box !== undefined)
+    return boxes.filter(notEmpty)
 
    
 }
@@ -165,7 +168,7 @@ function checkWindowsForWinner(windows: Place[][]): Player | undefined {
 }
 
 
-function checkBoardForWinner(board:Board): Player | undefined {
+export function checkBoardForWinner(board:Board): Player | undefined {
     // We didn't need to define a type here but it makes it helpful in understanding the flow of the code
     const winningLength = 4
     

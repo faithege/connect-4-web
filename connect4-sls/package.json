@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "serverless deploy",
     "deployQuick": "serverless deploy function -f handler && serverless deploy function -f connectionHandler",
-    "invoke": "serverless invoke -f handler"
+    "invoke": "serverless invoke -f handler",
+    "compile": "tsc"
   },
   "dependencies": {
     "express": "^4.17.1",
