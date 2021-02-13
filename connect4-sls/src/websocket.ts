@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult} fr
 import { DynamoDB , ApiGatewayManagementApi } from "aws-sdk";
 import { getGameFromDatabase, updateConnectionId, updateGameInDatabase } from "./database";
 import { checkBoardForWinner, placeCounter, switchCurrentPlayer } from "./game";
-import { ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerMessage } from "./models";
+import { Board, ClientColumn, ClientHello, ClientMessage, ColumnClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerMessage } from "./models";
 import { generateErrorMessage, generateGameMessage, generateWinnerMessage, getConnectionId, isClientMessage, isJsonString, isServerErrorMessage } from "./utils";
 
 const documentClient = new DynamoDB.DocumentClient();
@@ -63,7 +63,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       if (isServerErrorMessage(payloadGameOrError)){
         const error: ServerErrorMessage = payloadGameOrError
         sendMessageToClient (context.domainName!, context.stage, sessionId, error)
-        return
+        return generateResponseLog(400, error)
       }
 
       const [payload, game]: [ClientMessage, Game] = payloadGameOrError
@@ -74,22 +74,17 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           await sendMessageToClient(context.domainName!, context.stage, sessionId, generateGameMessage(game.boardState, game.currentPlayer))
           break;
         case ClientColumn:
-          //verify correct player making move
-          if (payload.playerId !== game.currentPlayer){
-            await sendMessageToClient(context.domainName!, context.stage, sessionId, generateErrorMessage(`Incorrect player making move, it is ${game.currentPlayer}'s turn`))
-            //return generateResponseLog(400, "Incorrect player")
+          const [message, boardState, nextPlayer] = processClientColumnChoice(payload, game)
+
+          if (isServerErrorMessage(message)){
+            await sendMessageToClient(context.domainName!, context.stage, sessionId, message)
             break;
           }
-          
-          const updatedBoard = placeCounter(game.boardState, payload.column, game.currentPlayer)  // FE will ensure column is 0-indexed
-          const nextPlayer = switchCurrentPlayer(game.currentPlayer)
-          const winner = checkBoardForWinner(updatedBoard)
 
-          //update db
-          const updatedGame = await updateGameInDatabase(documentClient, gameTableName, game.gameId, updatedBoard, nextPlayer)
+          //update db if client message acceptable
+          const updatedGame = await updateGameInDatabase(documentClient, gameTableName, game.gameId, boardState, nextPlayer)
 
           if (updatedGame){
-            const message = winner ? generateWinnerMessage(game.boardState, winner) : generateGameMessage(game.boardState, game.currentPlayer)
             await broadcastMessage(context.domainName!, context.stage, updatedGame, message) 
           }
           else{
@@ -118,6 +113,23 @@ export const handler: APIGatewayProxyHandler = async (event) => {
  * Server -> Client Messaging features
  *
  */
+
+ function processClientColumnChoice(payload: ColumnClientMessage, game: Game): [ServerMessage, Board, Player]{
+  let message
+
+  //verify correct player making move
+  if (payload.playerId !== game.currentPlayer){
+    message = generateErrorMessage(`Incorrect player making move, it is ${game.currentPlayer}'s turn`)
+    return [message, game.boardState, game.currentPlayer]
+  }
+
+  const updatedBoard = placeCounter(game.boardState, payload.column, game.currentPlayer)  // FE will ensure column is 0-indexed
+  const nextPlayer = switchCurrentPlayer(game.currentPlayer)
+  const winner = checkBoardForWinner(updatedBoard)
+  message = winner ? generateWinnerMessage(game.boardState, winner) : generateGameMessage(game.boardState, game.currentPlayer)
+
+  return [message, updatedBoard, nextPlayer]
+ }
 
 
 async function verifyClientMessage(table: string, event: APIGatewayProxyEvent): Promise<[ClientMessage, Game] | ServerErrorMessage> {
