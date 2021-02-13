@@ -1,12 +1,12 @@
 <template>
   <Main class="hello">
     <h1>Connect Four</h1>
-    <Section v-for="(row, index) in board" :key="index">
+    <Section v-for="(row, index) in boardState" :key="index">
       <Row :row="row"/>
     </Section>
     <Section>
       <!-- Extract this to a separate component, heading too -->
-      <b-form-select v-model="selectedColumn" :options="columnChoices">
+      <b-form-select v-model="selectedColumn" :options="columnChoices" @change="emitColumnChange">
         <template slot="first">
         <option disabled>  -- Please select column choice -- </option>
         </template>
@@ -17,29 +17,30 @@
 
 <script>
 import Row from './Row.vue'
-// import { b-dropdown } from 'bootstrap-vue'
 
 export default {
   name: 'Board',
   components: {
     Row
   },
-  props: {},
+  props: {
+    boardState: Array
+  },
+  watch: { 
+    boardState: function(newVal, oldVal) { 
+      console.log('Prop changed: ', newVal, ' | was: ', oldVal)
+    }
+  },
   data: function () {
     return {
-      board: [ 
-        [".",".",".",".",".",".","."],
-        [".",".",".",".",".",".","."],
-        [".",".",".",".",".",".","."],
-        [".",".",".",".",".",".","."],
-        [".",".","y",".",".",".","."],
-        [".","r","r","y",".",".","."]
-        ],
       columnChoices: [1,2,3,4,5,6,7],
       selectedColumn: null
     }
   },
   methods:{
+    emitColumnChange(){
+      this.$emit('column-change', this.selectedColumn)
+    }
   },
 }
 </script>
