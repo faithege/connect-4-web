@@ -209,6 +209,5 @@ async function sendMessageToClient(domainName:string, stage:string, connectionId
 
 /*
 TODOS
-- Send back board state, current player and winner (1 message)
 - Error handling e.g. invalid col choice (full or doesn't exist), or play when not your turn, if playerId not red or yellow
  */

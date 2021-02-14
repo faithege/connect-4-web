@@ -44,23 +44,22 @@ export default {
     this.connection = new WebSocket(`wss://71cpicttcd.execute-api.eu-west-1.amazonaws.com/dev?gameId=${this.gameId}&playerId=${this.playerId}`)
 
     // on open only completes once - when connection established
-    this.connection.onopen = function(event) {
+    this.connection.onopen = (event) => {
       console.log(event)
       console.log("Successfully connected to the connect 4 api...")
       const helloMessage = {
-        gameId: self.gameId,
-        playerId: self.playerId,
+        gameId: this.gameId,
+        playerId: this.playerId,
         type: 'CLIENT_HELLO'
       }
       // using event.target as we cannot access this key word
-      event.target.send(JSON.stringify(helloMessage));
+      this.connection.send(JSON.stringify(helloMessage));
     }
 
-    let self = this
-    this.connection.onmessage = function(event) { //called for every incoming message
+    this.connection.onmessage = (event) => { //called for every incoming message
       console.log(event);
       const serverMessage = JSON.parse(event.data)
-      self.board = serverMessage.boardState // not updating this.board -> gets confused
+      this.board = serverMessage.boardState // not updating this.board -> gets confused
     }
 
   },
