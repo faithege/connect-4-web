@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: 'Board',
+  name: 'BoardRow',
   props: {
     row: Array
   },

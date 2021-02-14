@@ -1,17 +1,36 @@
 <template>
-  <div id="app">
-    <Board
-      v-bind:boardState="board" @column-change="playMove($event)"/>
-  </div>
+  <Main id=app>
+    <b-container>
+      <b-row>
+        <b-col cols="12">
+          <h1>Connect Four</h1>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="8" offset="2">
+          <Board
+            v-bind:boardState="board"/>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2" offset="5">
+          <ColumnDropdown
+            @column-change="playMove($event)"/>
+        </b-col>
+      </b-row>
+    </b-container>
+  </Main>
 </template>
 
 <script>
 import Board from './components/Board.vue'
+import ColumnDropdown from './components/ColumnDropdown.vue'
 
 export default {
   name: 'App',
   components: {
-    Board
+    Board,
+    ColumnDropdown
   },
   data: function() {
     return {
