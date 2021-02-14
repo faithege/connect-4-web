@@ -1,9 +1,11 @@
 <template>
   <div>
     <Section>
-      <b-form-select v-model="selectedColumn" :options="columnChoices" @change="emitColumnChange">
+      <b-form-select 
+      v-model="selectedColumn" 
+      :options="columnChoices" @change="emitColumnChange">
         <template slot="first">
-        <option disabled>  -- Please select column choice -- </option>
+          <option disabled>  -- Please select column choice -- </option>
         </template>
       </b-form-select>
     </Section>
@@ -24,10 +26,9 @@ export default {
     emitColumnChange(){
       this.$emit('column-change', this.selectedColumn)
     }
-  },
+  }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 </style>

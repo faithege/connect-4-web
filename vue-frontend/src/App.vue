@@ -1,5 +1,5 @@
 <template>
-  <Main id=app>
+  <Main id='app'>
     <b-container>
       <b-row>
         <b-col cols="12">
