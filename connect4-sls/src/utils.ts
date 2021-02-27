@@ -14,6 +14,10 @@ export function getConnectionId(game: Game, player: Player): string | undefined{
     return player === 'r' ? game.connectionIdR : game.connectionIdY
 }
 
+export function getSecretAccessToken(game: Game, player: Player): string | undefined{
+  return player === 'r' ? game.secretAccessTokenR : game.secretAccessTokenY
+}
+
 // type guard clientMessage to ensure all the correct attributes are present
 // is there a better way to do this?
 export function isClientMessage(value: ClientMessage ): value is ClientMessage { 

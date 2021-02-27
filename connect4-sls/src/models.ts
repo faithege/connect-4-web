@@ -12,6 +12,8 @@ export interface Game {
     currentPlayer: Player
     connectionIdR: string | undefined
     connectionIdY: string | undefined
+    secretAccessTokenR: string | undefined
+    secretAccessTokenY: string | undefined
 }
 
 interface Message {

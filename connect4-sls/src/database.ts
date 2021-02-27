@@ -31,7 +31,9 @@ export function generateNewGame(gameId: GameId, dateTime: Date, startingPlayer: 
         currentPlayer: startingPlayer,
         boardState: generateEmptyBoard(),
         connectionIdR: undefined,
-        connectionIdY: undefined
+        connectionIdY: undefined,
+        secretAccessTokenR: undefined,
+        secretAccessTokenY: undefined
     }
 }
 
@@ -109,6 +111,32 @@ export async function updateConnectionId(documentClient: DocumentClient, tableNa
         ExpressionAttributeNames: {'#connection' : `connectionId${newPlayer.toUpperCase()}`},
         ExpressionAttributeValues: {
           ':c' : connectionId
+        },
+        ReturnValues: 'ALL_NEW'
+    }
+
+    console.log(JSON.stringify(params))
+
+    const savedGame = await documentClient.update(params).promise();
+    console.log(`${JSON.stringify(savedGame)}`)
+
+    if (savedGame.Attributes){
+        return <Game>savedGame.Attributes
+    }
+    else{
+        return undefined // what is the error happening here? Add better handling/logging here - should give as much detail as possible
+    }
+
+}
+
+export async function updateClientSecret(documentClient: DocumentClient, tableName:string, gameId: string, newPlayer: Player, clientSecret: string): Promise<Game | undefined>{
+    const params = {
+        TableName: tableName,
+        Key: { gameId : gameId },
+        UpdateExpression: 'set #secret = :c',
+        ExpressionAttributeNames: {'#secret' : `secretAccessToken${newPlayer.toUpperCase()}`},
+        ExpressionAttributeValues: {
+          ':c' : clientSecret
         },
         ReturnValues: 'ALL_NEW'
     }
