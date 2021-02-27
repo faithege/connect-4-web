@@ -20,6 +20,7 @@ function responseToExpress(nodeResponse: Response, response: CustomResponse){
 
 function adapter(fn:(req: Request, tableName: string) => Promise<CustomResponse>) {
     return async function (req: Request, res: Response) {
+        res.header('Access-Control-Allow-Origin', '*')
         if (!gameTableName) {
             console.error('ENV VAR DYNAMODB_TABLE has not been defined')
             res.status(500).json('There\'s an internal configuration error')
