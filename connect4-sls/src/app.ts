@@ -1,7 +1,8 @@
-import { addGameToDatabase, generateGameId, generateNewGame, getGameFromDatabase, updateGameInDatabase } from "./database";
+import { addGameToDatabase, generateNewGame, getGameFromDatabase, updateGameInDatabase } from "./database";
 import { Player } from "./models";
 import { processPlayerMove, switchCurrentPlayer } from "./game";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { generateId } from "./utils";
 
 export interface CustomResponse {
   statusCode: number
@@ -16,7 +17,7 @@ export function generateResponse(statusCode: number, body: string | object): Cus
 }
 
 export async function postNewGame(documentClient: DocumentClient, tableName: string): Promise<CustomResponse>{
-  const newGame = generateNewGame(generateGameId(), new Date(), "r")
+  const newGame = generateNewGame(generateId(), new Date(), "r")
   const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
   return generateResponse(200, savedGame)
 }

@@ -1,4 +1,4 @@
-import { Board, ClientColumn, ClientHello, ClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerGame, ServerGameMessage, ServerWinner, ServerWinnerMessage } from "./models";
+import { Board, ClientColumn, ClientHello, ClientMessage, Game, GameId, Player, ServerError, ServerErrorMessage, ServerGame, ServerGameMessage, ServerWinner, ServerWinnerMessage } from "./models";
 
 export function isJsonString(str: string): boolean {
     try {
@@ -7,6 +7,16 @@ export function isJsonString(str: string): boolean {
         return false;
     }
     return true;
+}
+
+export function generateId() :GameId {
+  const idLength = 32 //how long we want the game id -> the bigger the less liklihood of collision
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  const result = Array(idLength).fill(undefined)
+                                  .map(_ => characters.charAt(Math.floor(Math.random() * charactersLength)))
+                                  .join('')
+  return result;
 }
 
 //SH says this would not scale (presumably if have players other that r/y), but the code is clean!

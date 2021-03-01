@@ -2,16 +2,6 @@ import { Board, Game, GameId, Player } from "./models";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 
-export function generateGameId() :GameId {
-    const idLength = 32 //how long we want the game id -> the bigger the less liiklihood of collision
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    const result = Array(idLength).fill(undefined)
-                                    .map(_ => characters.charAt(Math.floor(Math.random() * charactersLength)))
-                                    .join('')
-    return result;
- }
-
 function generateEmptyBoard(): Board {
     return [ 
         [".",".",".",".",".",".","."],
