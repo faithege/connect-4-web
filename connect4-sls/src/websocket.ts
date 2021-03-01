@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult} fr
 import { DynamoDB , ApiGatewayManagementApi } from "aws-sdk";
 import { getGameFromDatabase, updateClientSecret, updateConnectionId, updateGameInDatabase } from "./database";
 import { checkBoardForWinner, placeCounter, switchCurrentPlayer } from "./game";
-import { Board, ClientColumn, ClientHello, ClientMessage, ColumnClientMessage, Game, Player, ServerError, ServerErrorMessage, ServerMessage } from "./models";
+import { Board, ClientColumn, ClientHello, ClientMessage, ColumnClientMessage, Game, GameId, Player, ServerError, ServerErrorMessage, ServerMessage } from "./models";
 import { generateErrorMessage, generateGameMessage, generateWinnerMessage, getConnectionId, getSecretAccessToken, isClientMessage, isJsonString, isServerErrorMessage } from "./utils";
 
 const documentClient = new DynamoDB.DocumentClient();
@@ -39,27 +39,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       const gameId = queryParams.gameId;
       const playerId = <Player>queryParams.playerId; // add in type guard pre-cast to make sure r or y?
       const clientSecret = queryParams.secretAccessToken
-      
-      if (!gameId || !playerId || !clientSecret) { // could do extra analysis e.g. is secret x characters long
-        return generateResponseLog(400, "gameId, playerId, and access token must be provided")
-      }
-      
-      const game = await getGameFromDatabase(documentClient, gameTableName, gameId)
-      console.log(`Game: ${JSON.stringify(game)}`)
-      if (!game){
-        return generateResponseLog(400, "Game not found")
-      }
-      const databaseSecret = getSecretAccessToken(game, playerId)
-      if(!databaseSecret){
-        await updateClientSecret(documentClient, gameTableName, game.gameId, playerId, clientSecret) // only updated at the start so done separately from connection id
-      }
-      else if (databaseSecret !== clientSecret){
-        return generateResponseLog(401, "Unauthorised access token")
-      }
 
-      const connectedGame = await updateConnectionId(documentClient, gameTableName, game.gameId, playerId, sessionId)
-
-      return generateResponseLog(200, connectedGame)
+      return await verifyClientConnection(gameTableName, gameId, playerId, clientSecret, sessionId)
 
       
     } else if (routeKey === "$disconnect") {
@@ -137,6 +118,30 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   message = winner ? generateWinnerMessage(game.boardState, winner) : generateGameMessage(game.boardState, game.currentPlayer)
 
   return [message, updatedBoard, nextPlayer]
+ }
+
+ async function verifyClientConnection(gameTableName: string, gameId: GameId, playerId: Player, clientSecret: string, sessionId: string): Promise<APIGatewayProxyResult> {
+    if (!gameId || !playerId || !clientSecret) { // could do extra analysis e.g. is secret x characters long
+      return generateResponseLog(400, "gameId, playerId, and access token must be provided")
+    }
+    
+    const game = await getGameFromDatabase(documentClient, gameTableName, gameId)
+    console.log(`Game: ${JSON.stringify(game)}`)
+    if (!game){
+      return generateResponseLog(400, "Game not found")
+    }
+
+    const databaseSecret = getSecretAccessToken(game, playerId)
+    if(!databaseSecret){
+      await updateClientSecret(documentClient, gameTableName, game.gameId, playerId, clientSecret) // only updated at the start so done separately from connection id
+    }
+    else if (databaseSecret !== clientSecret){
+      return generateResponseLog(401, "Unauthorised access token")
+    }
+
+    const connectedGame = await updateConnectionId(documentClient, gameTableName, game.gameId, playerId, sessionId)
+
+    return generateResponseLog(200, connectedGame)
  }
 
 
