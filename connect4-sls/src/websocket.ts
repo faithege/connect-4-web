@@ -44,7 +44,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
       
     } else if (routeKey === "$disconnect") {
-      // Delete Session
+      // Remove connection id? Not 100% necessary as we overwrite
+      // what params do we have? if no gameId - becomes expensive to go through entirety of game table
       
     } else {
       const payloadGameOrError: [ClientMessage, Game] | ServerErrorMessage = await verifyClientMessage(gameTableName, event)
