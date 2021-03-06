@@ -11,7 +11,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 const routes = [
   { path: '/:gameId/:playerId', component: GameSessionPage },
-  { path: '/new', component: NewGamePage },
+  { path: '/', component: NewGamePage },
 ];
 
 const router = new VueRouter({
