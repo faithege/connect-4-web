@@ -8,14 +8,12 @@
     "strict": true,
     "sourceMap": true,
     "target": "es2019",
-    "outDir": "lib"
+    "outDir": "lib",
+    "composite": true
   },
-  "include": ["./**/*.ts"],
-  "exclude": [
-    "node_modules/**/*",
-    ".serverless/**/*",
-    ".webpack/**/*",
-    "_warmup/**/*",
-    ".vscode/**/*"
-  ]
+  "include": [
+    "./index.ts",
+    "./src/**/*.ts",
+    // being explicit about what we are specifying to be locations of ts files
+  ],
 }
