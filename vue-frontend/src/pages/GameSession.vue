@@ -18,7 +18,7 @@
 <script>
 import Board from '@/components/Board.vue'
 import ColumnDropdown from '@/components/ColumnDropdown.vue'
-//import generateId from '@/utils.ts'
+import { generateId } from '@/../../connect4-sls/src/utils';
 
 export default {
   name: 'GameSession',
@@ -50,20 +50,9 @@ export default {
     
   },
   created: function() {
-    // const gameId = 'lBxwNMmOEqYrs2BrYkk4nQi5sLMcZgHC'
     this.gameId = this.$route.params.gameId
     this.playerId = this.$route.params.playerId
-    console.log("Starting connection to WebSocket Server")
-
-    function generateId() {
-      const idLength = 32 //how long we want the game id -> the bigger the less liklihood of collision
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const charactersLength = characters.length;
-      const result = Array(idLength).fill(undefined)
-                                      .map(_ => characters.charAt(Math.floor(Math.random() * charactersLength)))
-                                      .join('')
-      return result;
-  }
+    console.log("Starting connection to WebSocket Server") 
     
     //look in local storage to see if token exists -> tidy up if not, then extract out from storage
     if (!localStorage.getItem("secretToken")) {
