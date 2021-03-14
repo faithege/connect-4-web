@@ -16,10 +16,15 @@ const serverlessConfiguration: Serverless = {
     webpack: {
       webpackConfig: './webpack.config.js',
       includeModules: true
+    },
+    client: {
+      bucketName: 'connect-4-web-faith-ege',
+      distributionFolder: '../vue-frontend/dist',
+      errorDocument: 'index.html'
     }
   },
   // Add the serverless-webpack plugin
-  plugins: ['serverless-webpack'],
+  plugins: ['serverless-webpack', 'serverless-finch'],
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',
@@ -44,6 +49,12 @@ const serverlessConfiguration: Serverless = {
         'dynamodb:DeleteItem',
       ],
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+    },{
+      Effect: 'Allow',
+      Action: [
+        's3:*'
+      ],
+      Resource: "arn:aws:s3:*:*:connect-4-web-faith-ege*"
     }]
   },
   functions: {

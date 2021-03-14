@@ -44,6 +44,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
       
     } else if (routeKey === "$disconnect") {
+      console.log(`DISCONNECT EVENT:`, event)
       // Remove connection id? Not 100% necessary as we overwrite
       // what params do we have? if no gameId - becomes expensive to go through entirety of game table
       

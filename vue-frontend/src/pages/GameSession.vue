@@ -12,13 +12,18 @@
             @column-change="playMove($event)"/>
         </b-col>
       </b-row>
+      <b-row>
+        <b-col cols="2" offset="5">
+          <b-button size="lg" @click="handleClick()">Close Connection</b-button>
+        </b-col>
+      </b-row>
   </Section>
 </template>
 
 <script>
 import Board from '@/components/Board.vue'
 import ColumnDropdown from '@/components/ColumnDropdown.vue'
-import { generateId } from '@/../../connect4-sls/src/utils';
+//import { generateId } from '@/../../connect4-sls/src/utils';
 
 export default {
   name: 'GameSession',
@@ -47,18 +52,34 @@ export default {
       this.connection.send(JSON.stringify(columnMessage));
     
     },
+
+    handleClick() {
+      this.connection.close()
+    }
     
   },
   created: function() {
     this.gameId = this.$route.params.gameId
     this.playerId = this.$route.params.playerId
     console.log("Starting connection to WebSocket Server") 
+
+    function generateId() {
+      const idLength = 32 //how long we want the game id -> the bigger the less liklihood of collision
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      const result = Array(idLength).fill(undefined)
+                                      .map(_ => characters.charAt(Math.floor(Math.random() * charactersLength)))
+                                      .join('')
+      return result;
+    }
     
     //look in local storage to see if token exists -> tidy up if not, then extract out from storage
     if (!localStorage.getItem("secretToken")) {
       const newToken = generateId()
       localStorage.setItem("secretToken", newToken)
     }
+
+    
     
     
     const clientToken = localStorage.getItem("secretToken")
@@ -84,6 +105,11 @@ export default {
       console.log(event);
       const serverMessage = JSON.parse(event.data)
       this.board = serverMessage.boardState // not updating this.board -> gets confused
+    }
+
+    this.connection.onclose = (event) => {
+      console.log(event)
+      console.log("Successfully disconnected...")
     }
 
   },
