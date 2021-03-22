@@ -4,7 +4,6 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import NewGamePage from './pages/NewGame.vue';
 import GameSessionPage from './pages/GameSession.vue';
-import { publicPath } from '../vue.config'
 
 // Import Bootstrap an BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css';
@@ -17,8 +16,7 @@ const routes = [
 
 const router = new VueRouter({
   mode: 'history',
-  routes,
-  base: publicPath
+  routes
 });
 
 // Make BootstrapVue available throughout your project
