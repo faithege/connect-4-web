@@ -54,7 +54,7 @@ const serverlessConfiguration: Serverless = {
       Action: [
         's3:*'
       ],
-      Resource: "arn:aws:s3:*:*:connect-4-web-faith-ege*"
+      Resource: "arn:aws:s3:::connect-4-web-faith-ege*"
     }]
   },
   functions: {
