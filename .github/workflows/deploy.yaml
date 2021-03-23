@@ -1,0 +1,22 @@
+name: deploy lambdas
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  serverless:
+    name: deploy serverless framework
+    runs-on: ubuntu-latest #docker containers
+    environment: prod
+    steps: 
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: node version
+      uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+    - name: build
+      run: ./connect4-sls/script/ci.sh
+      env: 
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
