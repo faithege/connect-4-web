@@ -14,5 +14,5 @@ npm run serverless -- config credentials \
  --secret ${AWS_SECRET_ACCESS_KEY} \
  --profile cbf
 #compile, test, ship
-#npm run compile #we might be able to get rid of this if serveless deploy also compiles
+#npm run compile # not necessary as  serveless deploy also compiles
 npm run deploy -- --stage prod #credentials needed, add stage arguments using -- as we want to add onto the end of a command we have in our package.json

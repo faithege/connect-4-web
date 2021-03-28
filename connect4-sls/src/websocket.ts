@@ -25,10 +25,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   console.log(JSON.stringify(context))
   console.log(JSON.stringify(event))
 
-  // if (!maybeGameTableName){
-  //   console.error("DYNAMO_TABLE undefined")
-  //   return generateResponseLog(503,"There\'s an internal configuration error")
-  // }   
+  if (!maybeGameTableName){
+    console.error("DYNAMO_TABLE undefined")
+    return generateResponseLog(503,"There\'s an internal configuration error")
+  }   
   
   const gameTableName = maybeGameTableName //at this point we know that gameTableName exists
 
