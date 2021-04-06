@@ -86,7 +86,7 @@ export default {
 
 
     // hardcoding player and game ids
-    this.connection = new WebSocket(`wss://71cpicttcd.execute-api.eu-west-1.amazonaws.com/dev?gameId=${this.gameId}&playerId=${this.playerId}&secretAccessToken=${clientToken}`)
+    this.connection = new WebSocket(`${process.env.VUE_APP_ROOT_WEBSOCKET}?gameId=${this.gameId}&playerId=${this.playerId}&secretAccessToken=${clientToken}`)
 
     // on open only completes once - when connection established
     this.connection.onopen = (event) => {

@@ -3,8 +3,13 @@ import axios from 'axios';
 export default {
     createNewGame: async function() {
         try {
-            const response = await axios.post('https://ikx385nw43.execute-api.eu-west-1.amazonaws.com/dev/new');
+          if(process.env.VUE_APP_ROOT_REST){
+            const response = await axios.post(`${process.env.VUE_APP_ROOT_REST}/new`);
             console.log(response);
+          }
+          else{
+            console.log('error extracting env vars')
+          }
           } catch (error) {
             console.error(error);
           }
