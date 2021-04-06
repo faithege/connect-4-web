@@ -7,7 +7,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 DIST="${DIR}/../dist"
 
 # clean up existing dist file first > if don't will become additive (not best practice)
-rm -r ${DIST}
+rm -r ${DIST} || true
 
 mkdir -p ${DIST} #-p stops complaints if it already exists (side effect, actually means create parents)
 
