@@ -9,8 +9,6 @@ DIST="${DIR}/../dist"
 # clean up existing dist file first > if don't will become additive (not best practice)
 rm -r ${DIST} || true
 
-mkdir -p ${DIST} #-p stops complaints if it already exists (side effect, actually means create parents)
-
 cd ${DIR}/..
 npm install
 

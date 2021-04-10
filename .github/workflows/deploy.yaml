@@ -31,7 +31,7 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '12'
-    - name: build
+    - name: build 🏗️
       run: ./vue-frontend/script/ci.sh
     - name: deploy 🚀
       uses: JamesIves/github-pages-deploy-action@4.1.1 #Not GH approved
