@@ -1,35 +1,43 @@
 <template>
   <Section>
-      <b-row>
-        <b-col cols="8" offset="2">
-          <Board
-            v-bind:boardState="board"/>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2" offset="5">
-          <ColumnDropdown
-            @column-change="playMove($event)"/>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2" offset="5">
-          <b-button size="lg" @click="handleClick()">Close Connection</b-button>
-        </b-col>
-      </b-row>
+    <b-row>
+      <b-col cols="6" offset="3">
+        <ShareableUrl
+        v-if="$router.history._startLocation == '/'"/>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="8" offset="2">
+        <Board
+          v-bind:boardState="board"/>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="2" offset="5">
+        <ColumnDropdown
+          @column-change="playMove($event)"/>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="2" offset="5">
+        <b-button size="lg" @click="handleClick()">Close Connection</b-button>
+      </b-col>
+    </b-row>
   </Section>
 </template>
 
 <script>
 import Board from '@/components/Board.vue'
 import ColumnDropdown from '@/components/ColumnDropdown.vue'
+import ShareableUrl from '@/components/ShareableUrl.vue'
 //import { generateId } from '@/../../connect4-sls/src/utils';
 
 export default {
   name: 'GameSession',
   components: {
     Board,
-    ColumnDropdown
+    ColumnDropdown,
+    ShareableUrl
   },
   data: function() {
     return {
