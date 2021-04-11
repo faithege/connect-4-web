@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "serverless deploy",
     "deployQuick": "serverless deploy function -f handler && serverless deploy function -f connectionHandler",
+    "serverless": "serverless",
     "invoke": "serverless invoke -f handler",
     "compile": "tsc"
   },

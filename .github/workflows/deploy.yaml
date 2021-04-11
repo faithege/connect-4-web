@@ -1,0 +1,41 @@
+name: deploy lambdas
+on: 
+  push:
+    branches:
+      - main
+jobs:
+  serverless:
+    name: deploy serverless framework
+    runs-on: ubuntu-latest #docker containers
+    environment: prod
+    steps: 
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: node version
+      uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: build and deploy 🚀
+      run: ./connect4-sls/script/ci.sh
+      env: 
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+  frontend:
+    name: deploy vue frontend
+    runs-on: ubuntu-latest #docker containers
+    environment: prod
+    steps: 
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: node version
+      uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: build 🏗️
+      run: ./vue-frontend/script/ci.sh
+    - name: deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.1 #Not GH approved
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        folder: ./vue-frontend/dist # The folder the action should deploy.
+        target-folder: docs
