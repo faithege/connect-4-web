@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { BootstrapVue } from 'bootstrap-vue';
 import VueRouter from 'vue-router';
+import VueClipboard from 'vue-clipboard2'
 import App from './App.vue';
 import NewGamePage from './pages/NewGame.vue';
 import GameSessionPage from './pages/GameSession.vue';
@@ -22,6 +23,7 @@ const router = new VueRouter({
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue);
 Vue.use(VueRouter);
+Vue.use(VueClipboard);
 Vue.config.productionTip = false;
 
 new Vue({
