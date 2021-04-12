@@ -1,0 +1,30 @@
+name: build web app
+on: 
+  push:
+    branches-ignore:
+      - main #will run on all branches but main
+jobs:
+  serverless:
+    name: build serverless framework 🏗️
+    runs-on: ubuntu-latest #docker containers
+    steps: 
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: node version
+      uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: build 🏗️
+      run: ./connect4-sls/script/build.sh
+  frontend:
+    name: build vue frontend 🏗️
+    runs-on: ubuntu-latest #docker containers
+    steps: 
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: node version
+      uses: actions/setup-node@v2
+      with:
+        node-version: '12'
+    - name: build 🏗️
+      run: ./vue-frontend/script/ci.sh
