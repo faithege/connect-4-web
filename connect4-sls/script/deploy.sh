@@ -16,4 +16,5 @@ npm run serverless -- config credentials \
  --profile cbf
 #compile, test, ship
 #npm run compile # not necessary as  serveless deploy also compiles
-npm run deploy-prod -- --package ${PACKAGE}#credentials needed, add stage arguments using -- as we want to add onto the end of a command we have in our package.json
+npm run deploy-prod -- --package ${PACKAGE}
+#credentials needed, add stage arguments using -- as we want to add onto the end of a command we have in our package.json
