@@ -1,8 +1,6 @@
 name: build and deploy web app
 on: 
-  push:
-    branches:
-      - main
+  push
 jobs:
   serverless:
     name: deploy serverless framework
@@ -18,6 +16,7 @@ jobs:
     - name: build 🏗️
       run: ./connect4-sls/script/build.sh
     - name: deploy 🚀
+      if: ${{ github.ref == 'refs/heads/main' }}
       run: ./connect4-sls/script/deploy.sh
       env: 
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
@@ -36,6 +35,7 @@ jobs:
     - name: build 🏗️
       run: ./vue-frontend/script/ci.sh
     - name: deploy 🚀
+      if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@4.1.1 #Not GH approved
       with:
         branch: gh-pages # The branch the action should deploy to.
