@@ -1,6 +1,8 @@
 name: build and deploy web app
 on: 
-  push
+  push:
+    branches:
+      - main
 jobs:
   serverless:
     name: deploy serverless framework
@@ -13,7 +15,7 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '12'
-    - name: build 🏗️
+    - name: build 🏗️ # keep this as there's no connection between build and deploy workflow
       run: ./connect4-sls/script/build.sh
     - name: deploy 🚀
       if: ${{ github.ref == 'refs/heads/main' }} #without this, we will be able to deploy from any branch
