@@ -16,7 +16,7 @@ jobs:
     - name: build 🏗️
       run: ./connect4-sls/script/build.sh
     - name: deploy 🚀
-      if: ${{ github.ref == 'refs/heads/main' }}
+      if: ${{ github.ref == 'refs/heads/main' }} #without this, we will be able to deploy from any branch
       run: ./connect4-sls/script/deploy.sh
       env: 
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
