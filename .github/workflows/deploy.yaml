@@ -1,4 +1,4 @@
-name: deploy lambdas
+name: build and deploy web app
 on: 
   push:
     branches:
@@ -15,8 +15,10 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '12'
-    - name: build and deploy 🚀
-      run: ./connect4-sls/script/ci.sh
+    - name: build 🏗️
+      run: ./connect4-sls/script/build.sh
+    - name: deploy 🚀
+      run: ./connect4-sls/script/deploy.sh
       env: 
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}

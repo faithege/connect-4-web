@@ -5,6 +5,8 @@
   "main": "handler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build-prod": "serverless package --stage prod",
+    "deploy-prod": "serverless deploy --stage prod", 
     "deploy": "serverless deploy",
     "deployQuick": "serverless deploy function -f handler && serverless deploy function -f connectionHandler",
     "serverless": "serverless",
