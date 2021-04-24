@@ -34,7 +34,8 @@ const serverlessConfiguration: Serverless = {
     },
     environment: { // env vars
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      DYNAMODB_TABLE: '${self:service}-${opt:stage, self:provider.stage}' //can't use references like you can with CFN
+      DYNAMODB_TABLE: '${self:service}-${opt:stage, self:provider.stage}', //can't use references like you can with CFN
+      DYNAMODB_CONNECTIONS_TABLE: '${self:service}-connections-${opt:stage, self:provider.stage}'
     },
     region: 'eu-west-1',
     profile: 'cbf', //aws profile
@@ -48,7 +49,10 @@ const serverlessConfiguration: Serverless = {
         'dynamodb:UpdateItem',
         'dynamodb:DeleteItem',
       ],
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: [
+        "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}",
+        "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE}"
+      ]
     },{
       Effect: 'Allow',
       Action: [
@@ -91,7 +95,7 @@ const serverlessConfiguration: Serverless = {
   },
   resources: {
     Resources: {
-      userTable: {
+      userTable: { //gameTable would be a better name not sure if changing now would cause an issue?
         Type: 'AWS::DynamoDB::Table',
         Properties: {
           TableName: '${self:provider.environment.DYNAMODB_TABLE}',
@@ -105,6 +109,25 @@ const serverlessConfiguration: Serverless = {
           }],
           KeySchema: [
             { AttributeName: 'gameId', // We are hashing the data to give it a more even distribution
+              KeyType: 'HASH' 
+            }
+          ]
+        }
+      },
+      connectionsTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: '${self:provider.environment.DYNAMODB_CONNECTIONS_TABLE}',
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 1,
+            WriteCapacityUnits: 1
+          },
+          AttributeDefinitions: [{ 
+            AttributeName: 'connectionId',
+            AttributeType: 'S'
+          }],
+          KeySchema: [
+            { AttributeName: 'connectionId', // We are hashing the data to give it a more even distribution
               KeyType: 'HASH' 
             }
           ]
