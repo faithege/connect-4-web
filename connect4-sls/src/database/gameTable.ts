@@ -1,4 +1,4 @@
-import { Board, Game, GameId, Player } from "./models";
+import { Board, Game, GameId, Player } from "../model";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 
 
@@ -28,10 +28,10 @@ export function generateNewGame(gameId: GameId, dateTime: Date, startingPlayer: 
 }
 
 //arguments that will change most, put to RHS
-export async function addGameToDatabase(documentClient: DocumentClient, tableName:string, game: Game): Promise<Game> {
+export async function addGameToDatabase(documentClient: DocumentClient, gameTableName:string, game: Game): Promise<Game> {
     
     await documentClient.put({
-        TableName: tableName,
+        TableName: gameTableName,
         Item: game
     }).promise()
 
@@ -47,9 +47,9 @@ export async function addGameToDatabase(documentClient: DocumentClient, tableNam
     // return Promise.reject(new Error("Game saving failed"))
 }
 
-export async function getGameFromDatabase(documentClient: DocumentClient, tableName:string, id: string): Promise<Game | undefined>{
+export async function getGameFromDatabase(documentClient: DocumentClient, gameTableName:string, id: string): Promise<Game | undefined>{
     const params: DocumentClient.GetItemInput = {
-        TableName : tableName,
+        TableName : gameTableName,
         Key: {
             gameId: id
         }
@@ -68,10 +68,10 @@ export async function getGameFromDatabase(documentClient: DocumentClient, tableN
 
 }
 
-export async function updateGameInDatabase(documentClient: DocumentClient, tableName:string, gameId: string, updatedBoard: Board, newPlayer: Player): Promise<Game | undefined>{
+export async function updateGameInDatabase(documentClient: DocumentClient, gameTableName:string, gameId: string, updatedBoard: Board, newPlayer: Player): Promise<Game | undefined>{
 
     const params = {
-        TableName: tableName,
+        TableName: gameTableName,
         Key: { gameId : gameId },
         UpdateExpression: 'set #board = :b, #player = :p ',
         ExpressionAttributeNames: {'#board' : 'boardState', '#player' : 'currentPlayer'},
@@ -93,9 +93,9 @@ export async function updateGameInDatabase(documentClient: DocumentClient, table
 
 }
 
-export async function updateConnectionId(documentClient: DocumentClient, tableName:string, gameId: string, newPlayer: Player, connectionId: string): Promise<Game | undefined>{
+export async function updateGameConnectionId(documentClient: DocumentClient, gameTableName:string, gameId: string, newPlayer: Player, connectionId: string): Promise<Game | undefined>{
     const params = {
-        TableName: tableName,
+        TableName: gameTableName,
         Key: { gameId : gameId },
         UpdateExpression: 'set #connection = :c',
         ExpressionAttributeNames: {'#connection' : `connectionId${newPlayer.toUpperCase()}`},
@@ -119,9 +119,9 @@ export async function updateConnectionId(documentClient: DocumentClient, tableNa
 
 }
 
-export async function updateClientSecret(documentClient: DocumentClient, tableName:string, gameId: string, newPlayer: Player, clientSecret: string): Promise<Game | undefined>{
+export async function updateClientSecret(documentClient: DocumentClient, gameTableName:string, gameId: string, newPlayer: Player, clientSecret: string): Promise<Game | undefined>{
     const params = {
-        TableName: tableName,
+        TableName: gameTableName,
         Key: { gameId : gameId },
         UpdateExpression: 'set #secret = :c',
         ExpressionAttributeNames: {'#secret' : `secretAccessToken${newPlayer.toUpperCase()}`},
