@@ -46,39 +46,34 @@ export function generateWinnerMessage(board: Board, winner: Player): ServerWinne
     }
 }
 
-export async function broadcastMessage(domainName:string, stage:string, game: Game, message: ServerMessage) {
-
-    if(game.connectionIdR){
-        await sendMessageToClient(domainName, stage, game.connectionIdR, message)
-    }
-    if(game.connectionIdY){
-        await sendMessageToClient(domainName, stage, game.connectionIdY, message)
-    }
+export function generatePresenceMessage(game: Game): ServerPresenceMessage{
+  return {
+    type: ServerPresence,
+    playerRPresent: game.connectionIdR !== undefined,
+    playerYPresent: game.connectionIdY !== undefined
+  }
 }
 
-export async function broadcastPresence(domainName:string, stage:string, game: Game) {
+export async function broadcastMessage(domainName:string, stage:string, game: Game, message: ServerMessage) {
 
-    const message: ServerPresenceMessage = {
-        type: ServerPresence,
-        playerRPresent: game.connectionIdR !== undefined,
-        playerYPresent: game.connectionIdY !== undefined
-    }
-
-    // can't send messages to self when (dis)connecting
-
-    broadcastMessage(domainName, stage, game, message)
+  if(game.connectionIdR){
+      await sendMessageToClient(domainName, stage, game.connectionIdR, message)
+  }
+  if(game.connectionIdY){
+      await sendMessageToClient(domainName, stage, game.connectionIdY, message)
+  }
 }
 
 export async function sendMessageToClient(domainName:string, stage:string, connectionId: string, message: ServerMessage) {
-const WebsocketAPIGatewayAddress = `https://${domainName}/${stage}`;
-const apiGateway = new ApiGatewayManagementApi({ endpoint: WebsocketAPIGatewayAddress });
+  const WebsocketAPIGatewayAddress = `https://${domainName}/${stage}`;
+  const apiGateway = new ApiGatewayManagementApi({ endpoint: WebsocketAPIGatewayAddress });
 
-
+  try{
     if (message.type === ServerError && message.disconnect){
-        console.log(`Disconnecting user with connection id ${connectionId} because of error: ${message.error}`)
-        await apiGateway.deleteConnection({
-        ConnectionId: connectionId
-        }).promise();
+      console.log(`Disconnecting user with connection id ${connectionId} because of error: ${message.error}`)
+      await apiGateway.deleteConnection({
+      ConnectionId: connectionId
+      }).promise();
     }
     else{
         console.log(`Connection id ${connectionId}: ${message}`)
@@ -87,6 +82,15 @@ const apiGateway = new ApiGatewayManagementApi({ endpoint: WebsocketAPIGatewayAd
         Data: JSON.stringify(message),
         }).promise();
     }
+  }
+  catch(error){
+    if (error.code === 'GoneException') {
+      console.log(`sendMessageToClient: GONE EXCEPTION`)
+    }
+    else {
+      throw error
+    }
+  }
 }
 
 export async function verifyClientMessage(documentClient: DocumentClient, table: string, event: APIGatewayProxyEvent): Promise<[ClientMessage, Game] | ServerErrorMessage> {
