@@ -112,7 +112,9 @@ export default {
     this.connection.onmessage = (event) => { //called for every incoming message
       console.log(event);
       const serverMessage = JSON.parse(event.data)
-      this.board = serverMessage.boardState // not updating this.board -> gets confused
+      if(serverMessage.boardState){
+        this.board = serverMessage.boardState
+      }
     }
 
     this.connection.onclose = (event) => {
