@@ -1,5 +1,5 @@
 import { Board, Game, GameId, Player } from "../model";
-import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { DocumentClient, UpdateItemOutput } from "aws-sdk/clients/dynamodb";
 
 
 function generateEmptyBoard(): Board {
@@ -118,6 +118,67 @@ export async function updateGameConnectionId(documentClient: DocumentClient, gam
     }
 
 }
+
+export async function removeGameConnectionId(documentClient: DocumentClient, gameTableName:string, gameId: string, sessionId: string): Promise<Game | undefined>{
+
+
+    function generateParams(playerId: Player){
+        const params = {
+            TableName: gameTableName,
+            Key: { gameId : gameId },
+            UpdateExpression: 'remove #connection',
+            ExpressionAttributeNames: {'#connection' : `connectionId${playerId.toUpperCase()}`},
+            ConditionExpression: '#connection = :session',
+            ExpressionAttributeValues: {
+              ':session': sessionId
+            },
+            ReturnValues: 'ALL_NEW'
+        }
+    
+        console.log(`removeGameConnectionId (request) : ${JSON.stringify(params)}`)
+
+        return params
+    }
+
+    //we're telling the compiler that the result is a fulflled result if the return statement is true
+    function isFulfilled<T>(result: PromiseSettledResult<T> ): result is PromiseFulfilledResult<T> { 
+        return result.status === 'fulfilled';
+    }
+
+  
+    //For typing we checked what the inbuilt JS/AWs functions would return
+    const result: PromiseSettledResult<UpdateItemOutput>[] = await Promise.allSettled([
+        documentClient.update(generateParams('r')).promise(), 
+        documentClient.update(generateParams('y')).promise()
+    ]);
+    console.log(`removeGameConnectionId (result) : ${JSON.stringify(result)}`)
+
+    const [resultR, resultY] = result
+
+    /*
+    resultR  =>  {status: 'ful', value: updateResult}
+    resultY  =>  {status: 'rejected', reason: "blah blah blah"}
+    */
+
+    if(isFulfilled(resultR)){ //typeguard working for destructured resultR but not for array result - needs investigating
+        if (resultR.value.Attributes){
+            return <Game><unknown>resultR.value.Attributes
+        }
+    }
+    
+    if (isFulfilled(resultY)){ //typeguard working for destructured resultR but not for array result - needs investigating
+        if (resultY.value.Attributes){
+            return <Game><unknown>resultY.value.Attributes
+        }
+    }
+
+    return undefined
+
+    //const savedGame: PromiseFulfilledResult<UpdateItemOutput | undefined> = result.find( item => isFulfilled(item)) 
+
+
+}
+
 
 export async function updateClientSecret(documentClient: DocumentClient, gameTableName:string, gameId: string, newPlayer: Player, clientSecret: string): Promise<Game | undefined>{
     const params = {
