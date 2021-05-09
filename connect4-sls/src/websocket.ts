@@ -16,7 +16,7 @@ export function generateResponseLog(statusCode: number, body: string | object | 
     statusCode, 
     body: JSON.stringify(body)
   }
-  console.log(`Response: ${JSON.stringify(response)}`)
+  console.log(`generateResponseLog response: ${JSON.stringify(response)}`)
   return response
 }
 
@@ -27,8 +27,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const sessionId = context.connectionId!;
   const routeKey = context.routeKey as "$connect" | "$disconnect" | "$default";
 
-  console.log(JSON.stringify(context))
-  console.log(JSON.stringify(event))
+  console.log(`event context: ${JSON.stringify(context)}`)
+  console.log(`event: ${JSON.stringify(event)}`)
 
   if (!maybeGameTableName){
     console.error("DYNAMO_TABLE undefined")

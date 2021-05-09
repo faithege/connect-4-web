@@ -12,10 +12,10 @@ export async function updateConnection(documentClient: DocumentClient, connectio
         ReturnValues: 'ALL_NEW'
     }
 
-    console.log(`updateConnection: ${JSON.stringify(params)}`)
+    console.log(`updateConnection (request): ${JSON.stringify(params)}`)
 
     const savedConnection = await documentClient.update(params).promise();
-    console.log(`${JSON.stringify(savedConnection)}`)
+    console.log(`updateConnection (result): ${JSON.stringify(savedConnection)}`)
 
     if (savedConnection.Attributes){
         return <Connection>savedConnection.Attributes

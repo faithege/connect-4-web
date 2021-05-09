@@ -70,13 +70,13 @@ export async function sendMessageToClient(domainName:string, stage:string, conne
 
   try{
     if (message.type === ServerError && message.disconnect){
-      console.log(`Disconnecting user with connection id ${connectionId} because of error: ${message.error}`)
+      console.log(`sendMessageToClient: Disconnecting user with connection id ${connectionId} because of error: ${message.error}`)
       await apiGateway.deleteConnection({
       ConnectionId: connectionId
       }).promise();
     }
     else{
-        console.log(`Connection id ${connectionId}: ${message}`)
+        console.log(`sendMessageToClient: Connection id ${connectionId}: ${message}`)
         await apiGateway.postToConnection({
         ConnectionId: connectionId,
         Data: JSON.stringify(message),
@@ -107,7 +107,7 @@ export async function verifyClientMessage(documentClient: DocumentClient, table:
     }
   
     const payload = JSON.parse(event.body);
-    console.log(payload)
+    console.log(`verifyClientMessage payload: ${payload}`)
   
     // verify necessary message attributes provided
     if (!isClientMessage(payload)) {

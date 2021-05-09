@@ -105,10 +105,10 @@ export async function updateGameConnectionId(documentClient: DocumentClient, gam
         ReturnValues: 'ALL_NEW'
     }
 
-    console.log(JSON.stringify(params))
+    console.log(`updateGameConnectionId (request): ${JSON.stringify(params)}`)
 
     const savedGame = await documentClient.update(params).promise();
-    console.log(`${JSON.stringify(savedGame)}`)
+    console.log(`updateGameConnectionId (result): ${JSON.stringify(savedGame)}`)
 
     if (savedGame.Attributes){
         return <Game>savedGame.Attributes
@@ -192,10 +192,10 @@ export async function updateClientSecret(documentClient: DocumentClient, gameTab
         ReturnValues: 'ALL_NEW'
     }
 
-    console.log(JSON.stringify(params))
+    console.log(`updateClientSecret (request): ${JSON.stringify(params)}`)
 
     const savedGame = await documentClient.update(params).promise();
-    console.log(`${JSON.stringify(savedGame)}`)
+    console.log(`updateClientSecret (result): ${JSON.stringify(savedGame)}`)
 
     if (savedGame.Attributes){
         return <Game>savedGame.Attributes
