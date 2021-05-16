@@ -153,29 +153,16 @@ export async function removeGameConnectionId(documentClient: DocumentClient, gam
     ]);
     console.log(`removeGameConnectionId (result) : ${JSON.stringify(result)}`)
 
-    const [resultR, resultY] = result
-
     /*
     resultR  =>  {status: 'ful', value: updateResult}
     resultY  =>  {status: 'rejected', reason: "blah blah blah"}
     */
 
-    if(isFulfilled(resultR)){ //typeguard working for destructured resultR but not for array result - needs investigating
-        if (resultR.value.Attributes){
-            return <Game><unknown>resultR.value.Attributes
-        }
-    }
-    
-    if (isFulfilled(resultY)){ //typeguard working for destructured resultR but not for array result - needs investigating
-        if (resultY.value.Attributes){
-            return <Game><unknown>resultY.value.Attributes
-        }
-    }
+    const savedGame: PromiseFulfilledResult<UpdateItemOutput> | undefined = result.find(isFulfilled)
+    // const savedGame3: PromiseFulfilledResult<UpdateItemOutput> | undefined = result.find(result => result.status === 'fulfilled' && result.value) //cant do type narrowing (less specific > more specific type)
 
-    return undefined
-
-    //const savedGame: PromiseFulfilledResult<UpdateItemOutput | undefined> = result.find( item => isFulfilled(item)) 
-
+    //optional chaining returns game if savedGame defined, otherwise undefined
+    return <Game><unknown>savedGame?.value.Attributes
 
 }
 
