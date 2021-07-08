@@ -13,12 +13,12 @@ function generateEmptyBoard(): Board {
         ]
 }
 
-export function generateNewGame(gameId: GameId, dateTime: Date, startingPlayer: Player) : Game{
+export function generateNewGame(gameId: GameId, dateTime: Date, secondPlayer: Player) : Game{
     
     return {
         gameId: gameId,
         dateCreated: dateTime.toISOString(), //needs to be a string for the ddb
-        currentPlayer: startingPlayer,
+        currentPlayer: secondPlayer,
         boardState: generateEmptyBoard(),
         connectionIdR: undefined,
         connectionIdY: undefined,

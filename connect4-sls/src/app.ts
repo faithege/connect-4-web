@@ -17,7 +17,7 @@ export function generateResponse(statusCode: number, body: string | object): Cus
 }
 
 export async function postNewGame(documentClient: DocumentClient, tableName: string): Promise<CustomResponse>{
-  const newGame = generateNewGame(generateId(), new Date(), "r")
+  const newGame = generateNewGame(generateId(), new Date(), "y")
   const savedGame = await addGameToDatabase(documentClient, tableName, newGame)
   return generateResponse(200, savedGame)
 }
