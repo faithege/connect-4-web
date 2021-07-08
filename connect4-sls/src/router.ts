@@ -1,5 +1,4 @@
 import * as serverless from 'serverless-http'
-import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { CustomResponse, getGame, postNewGame, updateExistingGame } from './app'
 import { Request, Response } from 'express';
@@ -11,7 +10,7 @@ const app = express()
 const documentClient = new DynamoDB.DocumentClient();
 const gameTableName = process.env.DYNAMODB_TABLE;
 
-app.use(bodyParser.json({ strict: false }));
+app.use(express.json());
 
 
 function responseToExpress(nodeResponse: Response, response: CustomResponse){

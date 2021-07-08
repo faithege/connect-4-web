@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import { generateOtherPlayer } from '../utils'
+
 export default {
   data() {
       return {
@@ -26,19 +28,11 @@ export default {
             this.$copyText(this.shareableUrl)
             this.copySucceeded = true
         },
-        generateNextPlayer(playerId){
-        if (playerId == 'r') {
-            return 'y'
-        }
-        else if (playerId === 'y') {
-            return 'r'
-        }
-        }
     },
     mounted(){
         this.gameId = this.$route.params.gameId
         this.playerId = this.$route.params.playerId
-        this.nextPlayerId = this.generateNextPlayer(this.playerId);
+        this.nextPlayerId = generateOtherPlayer(this.playerId);
         this.shareableUrl = `${window.location.origin}/${this.gameId}/${this.nextPlayerId}`;
     }
 }
