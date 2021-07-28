@@ -8,6 +8,7 @@ node_modules/
 # Webpack directories
 .webpack/
 
-lib/
+lambda-js/lib/
+connect4-sls/lib/
 dist/
 vue-ts/
