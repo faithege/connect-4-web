@@ -7,9 +7,24 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="8" offset="2">
+      <b-col cols="2">
+        <PlayerStatusBox
+        id="currentPlayerStatusBox"
+        :isCurrentPlayer="true"
+        :player="playerId"
+        :isTurn="isCurrentPlayerTurn"
+        :isConnected="playerId === 'r' ? playerRPresent : playerYPresent"/>
+      </b-col>
+      <b-col cols="8">
         <Board
           v-bind:boardState="board"/>
+      </b-col>
+      <b-col cols="2">
+        <PlayerStatusBox
+        id="otherPlayerStatusBox"
+        :player="otherPlayerId"
+        :isTurn="isOtherPlayerTurn"
+        :isConnected="playerId === 'r' ? playerYPresent : playerRPresent"/>
       </b-col>
     </b-row>
     <b-row>
@@ -30,6 +45,8 @@
 import Board from '@/components/Board.vue'
 import ColumnDropdown from '@/components/ColumnDropdown.vue'
 import ShareableUrl from '@/components/ShareableUrl.vue'
+import PlayerStatusBox from '../components/PlayerStatusBox.vue'
+import { generateOtherPlayer } from '../utils'
 //import { generateId } from '@/../../connect4-sls/src/utils';
 
 export default {
@@ -37,14 +54,27 @@ export default {
   components: {
     Board,
     ColumnDropdown,
-    ShareableUrl
+    ShareableUrl,
+    PlayerStatusBox
   },
   data: function() {
     return {
       connection: null,
       board: null,
       gameId: null,
-      playerId: null
+      playerId: null,
+      otherPlayerId: 'unknown',
+      playerRPresent: false,
+      playerYPresent: false,
+      previousTurn: null
+    }
+  },
+  computed:{
+    isOtherPlayerTurn: function(){
+      return this.previousTurn === this.playerId
+    },
+    isCurrentPlayerTurn: function(){
+      return this.previousTurn === this.otherPlayerId
     }
   },
   methods: {
@@ -69,6 +99,7 @@ export default {
   created: function() {
     this.gameId = this.$route.params.gameId
     this.playerId = this.$route.params.playerId
+    this.otherPlayerId = generateOtherPlayer(this.playerId)
     console.log("Starting connection to WebSocket Server") 
 
     function generateId() {
@@ -112,7 +143,14 @@ export default {
     this.connection.onmessage = (event) => { //called for every incoming message
       console.log(event);
       const serverMessage = JSON.parse(event.data)
-      this.board = serverMessage.boardState // not updating this.board -> gets confused
+      if(serverMessage.type === "SERVER_PRESENCE"){
+        this.playerRPresent = serverMessage.playerRPresent
+        this.playerYPresent = serverMessage.playerYPresent
+
+      }  else {
+        this.board = serverMessage.boardState
+        this.previousTurn = serverMessage.currentPlayer
+      }
     }
 
     this.connection.onclose = (event) => {

@@ -1,4 +1,4 @@
-import { Player, Board, Column, Place } from "./models"
+import { Player, Board, Column, Place } from "./model"
 
 export function switchCurrentPlayer(currentPlayer: Player): Player {
     switch(currentPlayer) {
