@@ -12,3 +12,5 @@ lambda-js/lib/
 connect4-sls/lib/
 dist/
 vue-ts/
+
+cdk/

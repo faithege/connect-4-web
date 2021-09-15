@@ -21,11 +21,14 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-codebuild": "^1.116.0",
-    "@aws-cdk/aws-codepipeline": "^1.116.0",
-    "@aws-cdk/aws-codepipeline-actions": "^1.116.0",
+    "@aws-cdk/aws-codebuild": "1.116.0",
+    "@aws-cdk/aws-codepipeline": "1.116.0",
+    "@aws-cdk/aws-codepipeline-actions": "1.116.0",
+    "@aws-cdk/aws-iam": "1.116.0",
+    "@aws-cdk/aws-ssm": "1.116.0",
     "@aws-cdk/core": "1.116.0",
     "@aws-cdk/pipelines": "1.116.0",
+    "generator-serverless-policy": "^3.1.2",
     "source-map-support": "^0.5.16"
   }
 }
