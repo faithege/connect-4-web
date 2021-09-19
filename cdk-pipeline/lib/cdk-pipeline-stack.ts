@@ -266,7 +266,7 @@ export class CdkPipelineStack extends Stack {
       buildSpec: BuildSpec.fromObject({
         version: 0.1,
         phases:{
-          install:{ commands: ['cd ../connect4-sls && npm install']}, //dont need
+          install:{ commands: ['pwd && cd ../connect4-sls && npm install']}, //dont need
           build:{ commands: ['./node_modules/.bin/serverless deploy --stage prod | tee deploy.out']}, // //...build.sh
           //post_build:{ commands: ['./test.sh']} //./... deploy.sh
           // are there any other phases? test?
