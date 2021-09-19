@@ -226,28 +226,30 @@ export class CdkPipelineStack extends Stack {
       branch: 'main'
     });
 
-    const cdkPipeline = new CdkPipeline(this, 'CdkPipeline', {
+    const synthAction = SimpleSynthAction.standardNpmSynth({
+      sourceArtifact,
       cloudAssemblyArtifact,
 
+      // Use this if you need a build step (if you're not using ts-node
+      // or if you have TypeScript Lambdas that need to be compiled).
+      buildCommand: 'npm run build',
+      subdirectory: 'cdk-pipeline'
+    })
+
+    //synthAction.
+
+    // CDK PIPELINE
+    const cdkPipeline = new CdkPipeline(this, 'CdkPipeline', {
+      cloudAssemblyArtifact,
       sourceAction,
-
-      synthAction: SimpleSynthAction.standardNpmSynth({
-        sourceArtifact,
-        cloudAssemblyArtifact,
-
-        // Use this if you need a build step (if you're not using ts-node
-        // or if you have TypeScript Lambdas that need to be compiled).
-        buildCommand: 'npm run build',
-        subdirectory: 'cdk-pipeline'
-      }),
+      synthAction
     });
+    cdkPipeline.stage('Build')
 
+    // SERVERLESS PIPELINE
     const serverlessPipeline = new codepipeline.Pipeline(this, 'ServerlessPipeline', {
       crossAccountKeys: false,
     })
-
-    
-
     const sourceStage = serverlessPipeline.addStage({
       stageName: 'Source'
     });
@@ -275,6 +277,14 @@ export class CdkPipelineStack extends Stack {
     deployPermissions.forEach(permission => {
       buildProject.addToRolePolicy(new iam.PolicyStatement(permission))
     })
+    buildProject.addToRolePolicy(new iam.PolicyStatement({
+      actions: [
+        "ssm:GetParameter"
+      ],
+      resources: [
+        "*"
+      ]
+    }))
     
 
     const buildAction = new codepipeline_actions.CodeBuildAction({
