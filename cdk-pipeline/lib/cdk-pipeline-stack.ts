@@ -277,14 +277,14 @@ export class CdkPipelineStack extends Stack {
     deployPermissions.forEach(permission => {
       buildProject.addToRolePolicy(new iam.PolicyStatement(permission))
     })
-    buildProject.addToRolePolicy(new iam.PolicyStatement({
-      actions: [
-        "ssm:GetParameter"
-      ],
-      resources: [
-        "*"
-      ]
-    }))
+    // buildProject.addToRolePolicy(new iam.PolicyStatement({
+    //   actions: [
+    //     "ssm:GetParameter"
+    //   ],
+    //   resources: [
+    //     "*"
+    //   ]
+    // }))
     
 
     const buildAction = new codepipeline_actions.CodeBuildAction({
