@@ -237,7 +237,7 @@ export class CdkPipelineStack extends Stack {
 
     //synthAction.
 
-    // CDK PIPELINE
+    // CDK PIPELINE - this pipeline is self mutating
     const cdkPipeline = new CdkPipeline(this, 'CdkPipeline', {
       cloudAssemblyArtifact,
       sourceAction,

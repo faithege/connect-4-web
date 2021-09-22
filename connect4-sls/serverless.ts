@@ -38,7 +38,6 @@ const serverlessConfiguration: Serverless = {
       DYNAMODB_CONNECTIONS_TABLE: '${self:service}-connections-${opt:stage, self:provider.stage}'
     },
     region: 'eu-west-1',
-    profile: 'cbf', //aws profile
     iamRoleStatements: [{ //permissions
       Effect: 'Allow',
       Action: [
