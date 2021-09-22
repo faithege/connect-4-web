@@ -213,7 +213,6 @@ export class CdkPipelineStack extends Stack {
 
     const sourceArtifact = new codepipeline.Artifact();
     const cloudAssemblyArtifact = new codepipeline.Artifact();
-    const oauthToken = ssm.StringParameter.valueFromLookup(this, 'GITHUB_TOKEN_NAME');
 
     const sourceAction = new codepipeline_actions.GitHubSourceAction({
       actionName: 'GitHub',
@@ -266,7 +265,7 @@ export class CdkPipelineStack extends Stack {
       buildSpec: BuildSpec.fromObject({
         version: 0.1,
         phases:{
-          install:{ commands: ['pwd && cd ../connect4-sls && npm install']}, //dont need
+          install:{ commands: ['ls -a && cd connect4-sls && npm install']},
           build:{ commands: ['./node_modules/.bin/serverless deploy --stage prod | tee deploy.out']}, // //...build.sh
           //post_build:{ commands: ['./test.sh']} //./... deploy.sh
           // are there any other phases? test?
