@@ -235,7 +235,6 @@ export class CdkPipelineStack extends Stack {
       subdirectory: 'cdk-pipeline'
     })
 
-    //synthAction.
 
     // CDK PIPELINE - this pipeline is self mutating
     const cdkPipeline = new CdkPipeline(this, 'CdkPipeline', {
@@ -266,7 +265,7 @@ export class CdkPipelineStack extends Stack {
         version: 0.1,
         phases:{
           install:{ commands: ['ls -a && cd connect4-sls && npm install']},
-          build:{ commands: ['cd connect4-sls && ./node_modules/.bin/serverless deploy --stage prod | tee deploy.out']}, // //...build.sh
+          build:{ commands: ['cd connect4-sls && ./node_modules/.bin/serverless deploy --stage prod | tee deploy.out']},
           //post_build:{ commands: ['./test.sh']} //./... deploy.sh
           // are there any other phases? test?
         }
@@ -276,14 +275,6 @@ export class CdkPipelineStack extends Stack {
     deployPermissions.forEach(permission => {
       buildProject.addToRolePolicy(new iam.PolicyStatement(permission))
     })
-    // buildProject.addToRolePolicy(new iam.PolicyStatement({
-    //   actions: [
-    //     "ssm:GetParameter"
-    //   ],
-    //   resources: [
-    //     "*"
-    //   ]
-    // }))
     
 
     const buildAction = new codepipeline_actions.CodeBuildAction({

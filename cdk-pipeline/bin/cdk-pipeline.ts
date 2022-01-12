@@ -17,7 +17,12 @@ new CdkPipelineStack(app, 'CdkPipelineStack', {
    * want to deploy the stack to. */
   env: { account: '352651073960', region: 'eu-west-1' },
 
+  
+
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
+
+// new website stack here? how would we pass in the name of the bucket? could use the ssm process
+// website files generated as part of build stage
 
 app.synth();
